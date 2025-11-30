@@ -21,6 +21,13 @@ return {
       view = {
         width = 30,
       },
+      actions = {
+        open_file = {
+          window_picker = {
+            enable = false, -- Open in most recently used window instead of prompting
+          },
+        },
+      },
       renderer = {
         icons = {
           show = {
