@@ -103,15 +103,96 @@ return {
 
     -- Enable the following language servers
     local servers = {
+      -- Lua
       lua_ls = {
         settings = {
           Lua = {
             completion = {
               callSnippet = 'Replace',
             },
+            diagnostics = {
+              globals = { 'vim' }, -- Recognize 'vim' global
+            },
           },
         },
       },
+
+      -- Python (using python-lsp-server)
+      pylsp = {
+        settings = {
+          pylsp = {
+            plugins = {
+              pycodestyle = {
+                enabled = true,
+                maxLineLength = 100,
+              },
+              pylint = {
+                enabled = false, -- Can be enabled if pylint is installed
+              },
+              pyflakes = {
+                enabled = true,
+              },
+              autopep8 = {
+                enabled = true,
+              },
+              yapf = {
+                enabled = false,
+              },
+              black = {
+                enabled = false, -- Enable if black is installed
+              },
+              rope_autoimport = {
+                enabled = true,
+              },
+            },
+          },
+        },
+      },
+
+      -- TypeScript/JavaScript
+      ts_ls = {
+        root_dir = require('lspconfig').util.root_pattern('package.json', 'tsconfig.json', 'jsconfig.json', '.git'),
+        init_options = {
+          preferences = {
+            includePackageJsonAutoImports = 'on',
+          },
+        },
+      },
+
+      -- Go
+      gopls = {
+        settings = {
+          gopls = {
+            analyses = {
+              unusedparams = true,
+            },
+            staticcheck = true,
+          },
+        },
+      },
+
+      -- Rust
+      rust_analyzer = {
+        settings = {
+          ['rust-analyzer'] = {
+            checkOnSave = {
+              command = 'clippy',
+            },
+          },
+        },
+      },
+
+      -- Bash
+      bashls = {},
+
+      -- JSON
+      jsonls = {},
+
+      -- YAML
+      yamlls = {},
+
+      -- Terraform
+      terraformls = {},
     }
 
     -- Ensure the servers and tools above are installed

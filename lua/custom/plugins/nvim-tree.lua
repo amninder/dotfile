@@ -2,9 +2,6 @@
 -- https://github.com/nvim-tree/nvim-tree.lua
 return {
   'nvim-tree/nvim-tree.lua',
-  dependencies = {
-    'nvim-tree/nvim-web-devicons',
-  },
   config = function()
     require('nvim-tree').setup {
       on_attach = function(bufnr)
@@ -23,19 +20,22 @@ return {
       renderer = {
         icons = {
           show = {
+            hidden = true,
             file = true,
             folder = true,
             folder_arrow = true,
-            git = true,
+          },
+          web_devicons = {
+            file = {
+              enable = true,
+              color = true,
+            },
+            folder = {
+              enable = false,
+              color = true,
+            },
           },
         },
-      },
-      filters = {
-        dotfiles = false,
-      },
-      git = {
-        enable = true,
-        ignore = false,
       },
     }
   end,

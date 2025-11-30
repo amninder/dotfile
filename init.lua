@@ -91,7 +91,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = false
+vim.g.have_nerd_font = true
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -120,6 +120,12 @@ end)
 
 -- Enable break indent
 vim.o.breakindent = true
+
+-- Use spaces instead of tabs
+vim.o.expandtab = true
+vim.o.tabstop = 2
+vim.o.shiftwidth = 2
+vim.o.softtabstop = 2
 
 -- Save undo history
 vim.o.undofile = true
@@ -214,7 +220,6 @@ rtp:prepend(lazypath)
 require('lazy').setup({
   -- Import all plugins from custom/plugins directory
   { import = 'custom.plugins' },
-
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
