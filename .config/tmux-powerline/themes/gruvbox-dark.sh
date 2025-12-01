@@ -55,7 +55,7 @@ if [ -z "${TMUX_POWERLINE_LEFT_STATUS_SEGMENTS}" ]; then
 
         # Network segments - aqua/blue tones for connectivity
         "lan_ip ${GRUVBOX_BLUE} ${GRUVBOX_BG0}" \
-        "wan_ip ${GRUVBOX_AQUA} ${GRUVBOX_BG0}" \
+        "wan_ip ${GRUVBOX_AQUA} ${GRUVBOX_BG0} ${TMUX_POWERLINE_SEPARATOR_RIGHT_BOLD}" \
         "ifstat ${GRUVBOX_BG3} ${GRUVBOX_AQUA} ${TMUX_POWERLINE_SEPARATOR_LEFT_BOLD}" \
     )
 fi
