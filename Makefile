@@ -49,20 +49,30 @@ help:
 	@$(call print_colored,"Neovim Configuration Management","cyan")
 	@$(call print_colored,"================================","cyan")
 	@$(call print_help_item,"install-nvim","- Install Neovim (macOS: via brew)")
+	@printf '  \033[2m└─ install-brew\033[0m\n'
 	@$(call print_help_item,"install-nvim-plugins","- Install/sync all plugins via lazy.nvim")
+	@printf '  \033[2m└─ install-nvim\033[0m\n'
+	@printf '     \033[2m└─ install-brew\033[0m\n'
 	@$(call print_help_item,"update","- Update all plugins to latest versions")
 	@$(call print_help_item,"clean","- Clean plugin cache and unused plugins")
+	@printf '  \033[2m├─ clean-zsh\033[0m\n'
+	@printf '  \033[2m├─ clean-oh-my-zsh\033[0m\n'
+	@printf '  \033[2m├─ clean-tmux\033[0m\n'
+	@printf '  \033[2m└─ clean-gitconfig\033[0m\n'
 	@$(call print_help_item,"backup","- Backup current configuration")
 	@$(call print_help_item,"link","- Create symlink from current directory to ~/.config/nvim")
+	@printf '  \033[2m└─ link-gitconfig\033[0m\n'
 	@$(call print_help_item,"link-gitconfig","- Create symlink for ~/.gitconfig")
 	@$(call print_help_item,"clean-gitconfig","- Remove ~/.gitconfig symlink (safe)")
 	@$(call print_help_item,"unlink","- Remove symlink from ~/.config/nvim (safe)")
 	@$(call print_help_item,"purge-nvim","- Complete removal of Neovim and all data","red")
 	@$(call print_help_item,"install-fonts","- Install Nerd Fonts (macOS: via brew)")
+	@printf '  \033[2m└─ install-brew\033[0m\n'
 	@echo ""
 	@$(call print_colored,"Testing:","yellow")
 	@$(call print_help_item,"test-nerd-fonts","- Run smoke test for basic Nerd Font icons")
-	@$(call print_help_item,"test-smoke","- Run basic smoke test (same as test-nerd-fonts)")
+	@printf '  \033[2m└─ test-smoke\033[0m\n'
+	@$(call print_help_item,"test-smoke","- Run basic smoke test")
 	@$(call print_help_item,"test-unicode","- Test Unicode ranges with hex codes (comprehensive)")
 	@$(call print_help_item,"test-icons","- Test all icon sets (comprehensive, categorized)")
 	@$(call print_help_item,"test-all","- Run all Nerd Font tests")
@@ -70,13 +80,21 @@ help:
 	@$(call print_colored,"System Tools:","yellow")
 	@$(call print_help_item,"install-brew","- Install Homebrew (macOS only)")
 	@$(call print_help_item,"install-python","- Install Python development tools via Homebrew")
+	@printf '  \033[2m└─ install-brew\033[0m\n'
 	@$(call print_help_item,"install-dev-tools","- Install development tools (terraform-ls and typescript-language-server)")
+	@printf '  \033[2m└─ install-brew\033[0m\n'
 	@$(call print_help_item,"install-zsh","- Install Zsh shell (multi-OS support)")
+	@printf '  \033[2m└─ install-brew\033[0m\n'
 	@$(call print_help_item,"zsh-init","- Install Zsh and create ~/.zshrc symlink")
+	@printf '  \033[2m└─ install-zsh\033[0m\n'
+	@printf '     \033[2m└─ install-brew\033[0m\n'
 	@$(call print_help_item,"clean-zsh","- Remove ~/.zshrc symlink (safe)")
 	@$(call print_help_item,"install-oh-my-zsh","- Install Oh My Zsh framework")
+	@printf '  \033[2m└─ install-zsh\033[0m\n'
+	@printf '     \033[2m└─ install-brew\033[0m\n'
 	@$(call print_help_item,"clean-oh-my-zsh","- Uninstall Oh My Zsh completely")
 	@$(call print_help_item,"install-tmux","- Install tmux and create ~/.tmux.conf symlink")
+	@printf '  \033[2m└─ install-brew\033[0m\n'
 	@$(call print_help_item,"clean-tmux","- Uninstall tmux and remove configuration","red")
 	@echo ""
 	@$(call print_colored,"Environment Variables:","yellow")
