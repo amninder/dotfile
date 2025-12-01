@@ -50,9 +50,6 @@ if [ -z "${TMUX_POWERLINE_LEFT_STATUS_SEGMENTS}" ]; then
         # Session info - prominent yellow accent
         "tmux_session_info ${GRUVBOX_YELLOW} ${GRUVBOX_BG0}" \
 
-        # Hostname - blue for system identity
-        "hostname ${GRUVBOX_BG3} ${GRUVBOX_FG1}" \
-
         # Network segments - aqua/blue tones for connectivity
         "lan_ip ${GRUVBOX_BLUE} ${GRUVBOX_BG0}" \
         "wan_ip ${GRUVBOX_AQUA} ${GRUVBOX_BG0} ${TMUX_POWERLINE_SEPARATOR_RIGHT_BOLD}" \
