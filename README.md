@@ -1,241 +1,462 @@
-# kickstart.nvim
+# Dotfiles
 
-## Introduction
+Personal development environment configuration featuring Neovim, Tmux, and shell setups with a unified Gruvbox Dark theme.
 
-A starting point for Neovim that is:
+## 🎨 Features
 
-* Small
-* Single-file
-* Completely Documented
+### Tmux Configuration
+- **Gruvbox Dark Theme**: Professional color scheme matching Neovim
+- **tmux-powerline**: Custom status bar with Nerd Font glyphs
+- **System Monitoring**: Real-time CPU, memory, and load average display
+- **Network Information**: LAN IP, WAN IP, and bandwidth monitoring
+- **Weather Integration**: Current weather conditions in status bar
+- **Vi-mode**: Vim-style keybindings for navigation and copy mode
+- **Centered Window List**: Clean, organized window display
+- **Custom Keybindings**: Intuitive prefix (`Ctrl+a`) and shortcuts
 
-**NOT** a Neovim distribution, but instead a starting point for your configuration.
+### Neovim Configuration
+- **Modern Plugin Manager**: lazy.nvim for fast, lazy-loaded plugins
+- **LSP Support**: Language Server Protocol for intelligent code completion
+- **Treesitter**: Advanced syntax highlighting and code understanding
+- **File Explorer**: nvim-tree for sidebar file navigation
+- **Fuzzy Finding**: Telescope for quick file and content search
+- **Gruvbox Theme**: Consistent colors with Tmux environment
 
-## Installation
+### Shell Configuration
+- **Bash**: Custom prompt with git integration, extensive aliases
+- **Zsh**: Enhanced shell configuration
+- **Git**: Comprehensive aliases and helper functions
+- **Python Tools**: Enhanced pdb and ptpython configurations
 
-### Install Neovim
+### Testing Utilities
+- **Nerd Fonts Test Suite**: Verify font installation and rendering
+- **Three test levels**: Smoke test, Unicode ranges, and categorized icons
+- **Automated installation**: Makefile targets for easy setup
 
-Kickstart.nvim targets *only* the latest
-['stable'](https://github.com/neovim/neovim/releases/tag/stable) and latest
-['nightly'](https://github.com/neovim/neovim/releases/tag/nightly) of Neovim.
-If you are experiencing issues, please make sure you have the latest versions.
+## 📋 Requirements
 
-### Install External Dependencies
+### Essential
+- **macOS** (Linux compatible with minor adjustments)
+- **Neovim** >= 0.9.0
+- **Tmux** >= 3.0
+- **Git**
+- **Nerd Font** (required for powerline glyphs and icons)
 
-External Requirements:
-- Basic utils: `git`, `make`, `unzip`, C Compiler (`gcc`)
-- [ripgrep](https://github.com/BurntSushi/ripgrep#installation),
-  [fd-find](https://github.com/sharkdp/fd#installation)
-- Clipboard tool (xclip/xsel/win32yank or other depending on the platform)
-- A [Nerd Font](https://www.nerdfonts.com/): optional, provides various icons
-  - if you have it set `vim.g.have_nerd_font` in `init.lua` to true
-- Emoji fonts (Ubuntu only, and only if you want emoji!) `sudo apt install fonts-noto-color-emoji`
-- Language Setup:
-  - If you want to write Typescript, you need `npm`
-  - If you want to write Golang, you will need `go`
-  - etc.
+### Optional
+- **Homebrew** (for easy font installation)
+- **ifstat** (for bandwidth monitoring in tmux)
+- **Node.js** (for some LSP servers)
+- **Python 3** (for Python development features)
 
-> [!NOTE]
-> See [Install Recipes](#Install-Recipes) for additional Windows and Linux specific notes
-> and quick install snippets
+## 🚀 Installation
 
-### Install Kickstart
+### 1. Clone the Repository
 
-> [!NOTE]
-> [Backup](#FAQ) your previous configuration (if any exists)
-
-Neovim's configurations are located under the following paths, depending on your OS:
-
-| OS | PATH |
-| :- | :--- |
-| Linux, MacOS | `$XDG_CONFIG_HOME/nvim`, `~/.config/nvim` |
-| Windows (cmd)| `%localappdata%\nvim\` |
-| Windows (powershell)| `$env:LOCALAPPDATA\nvim\` |
-
-#### Recommended Step
-
-[Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) this repo
-so that you have your own copy that you can modify, then install by cloning the
-fork to your machine using one of the commands below, depending on your OS.
-
-> [!NOTE]
-> Your fork's URL will be something like this:
-> `https://github.com/<your_github_username>/kickstart.nvim.git`
-
-You likely want to remove `lazy-lock.json` from your fork's `.gitignore` file
-too - it's ignored in the kickstart repo to make maintenance easier, but it's
-[recommended to track it in version control](https://lazy.folke.io/usage/lockfile).
-
-#### Clone kickstart.nvim
-
-> [!NOTE]
-> If following the recommended step above (i.e., forking the repo), replace
-> `nvim-lua` with `<your_github_username>` in the commands below
-
-<details><summary> Linux and Mac </summary>
-
-```sh
-git clone https://github.com/nvim-lua/kickstart.nvim.git "${XDG_CONFIG_HOME:-$HOME/.config}"/nvim
+```bash
+git clone https://github.com/amninder/dotfile.git ~/dotfile
+cd ~/dotfile
 ```
 
-</details>
+### 2. Install Nerd Fonts
 
-<details><summary> Windows </summary>
+Install fonts using Homebrew (recommended):
 
-If you're using `cmd.exe`:
-
-```
-git clone https://github.com/nvim-lua/kickstart.nvim.git "%localappdata%\nvim"
+```bash
+make install-fonts
 ```
 
-If you're using `powershell.exe`
+Or manually download from [Nerd Fonts](https://www.nerdfonts.com/).
 
+**Recommended fonts:**
+- JetBrains Mono Nerd Font
+- Fira Code Nerd Font
+- Hack Nerd Font
+- Meslo LG Nerd Font
+
+### 3. Configure Your Terminal
+
+**Set your terminal font to a Nerd Font:**
+
+- **iTerm2**: Preferences → Profiles → Text → Font
+- **Terminal.app**: Preferences → Profiles → Font → Change
+- **VS Code**: Settings → Terminal › Integrated: Font Family
+
+**Example:**
 ```
-git clone https://github.com/nvim-lua/kickstart.nvim.git "${env:LOCALAPPDATA}\nvim"
+JetBrains Mono Nerd Font
 ```
 
-</details>
+### 4. Install Configuration Files
 
-### Post Installation
+#### Option A: Symbolic Links (Recommended)
 
-Start Neovim
+```bash
+# Neovim
+ln -s ~/dotfile/lua ~/.config/nvim/lua
+ln -s ~/dotfile/init.lua ~/.config/nvim/init.lua
 
-```sh
+# Tmux
+ln -s ~/dotfile/.tmux.conf ~/.tmux.conf
+ln -s ~/dotfile/.config/tmux-powerline ~/.config/tmux-powerline
+
+# Shell
+ln -s ~/dotfile/.bash_profile ~/.bash_profile
+ln -s ~/dotfile/.bashrc ~/.bashrc
+ln -s ~/dotfile/.zshrc ~/.zshrc
+
+# Git
+ln -s ~/dotfile/.gitconfig ~/.gitconfig
+
+# Python tools (optional)
+ln -s ~/dotfile/.pdbrc ~/.pdbrc
+ln -s ~/dotfile/.pdbrc.py ~/.pdbrc.py
+ln -s ~/dotfile/.ptpython ~/.ptpython
+```
+
+#### Option B: Direct Copy
+
+```bash
+# Copy all configs
+cp -r lua ~/.config/nvim/
+cp init.lua ~/.config/nvim/
+cp .tmux.conf ~/
+cp -r .config/tmux-powerline ~/.config/
+cp .bash_profile ~/.bash_profile
+cp .bashrc ~/.bashrc
+cp .zshrc ~/.zshrc
+cp .gitconfig ~/.gitconfig
+```
+
+### 5. Install Tmux Plugin Manager (TPM)
+
+```bash
+git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+```
+
+### 6. Install tmux-powerline
+
+```bash
+git clone https://github.com/erikw/tmux-powerline.git ~/.tmux/plugins/tmux-powerline
+```
+
+### 7. Reload Configurations
+
+```bash
+# Reload shell
+source ~/.bash_profile  # or source ~/.zshrc
+
+# Start tmux and install plugins
+tmux
+# Press: Ctrl+a then I (capital i) to install plugins
+
+# Start neovim (plugins install automatically)
 nvim
 ```
 
-That's it! Lazy will install all the plugins you have. Use `:Lazy` to view
-the current plugin status. Hit `q` to close the window.
+## 🧪 Testing
 
-#### Read The Friendly Documentation
+### Verify Nerd Font Installation
 
-Read through the `init.lua` file in your configuration folder for more
-information about extending and exploring Neovim. That also includes
-examples of adding popularly requested plugins.
+```bash
+# Quick smoke test
+make test-smoke
 
-> [!NOTE]
-> For more information about a particular plugin check its repository's documentation.
+# Comprehensive Unicode range test
+make test-unicode
 
+# Categorized icon sets test
+make test-icons
 
-### Getting Started
+# Run all tests
+make test-all
+```
 
-[The Only Video You Need to Get Started with Neovim](https://youtu.be/m8C0Cq9Uv9o)
+If you see boxes (□) or missing icons, ensure:
+1. A Nerd Font is installed
+2. Your terminal is configured to use it
+3. Terminal is restarted after font changes
 
-### FAQ
+## ⚙️ Configuration
 
-* What should I do if I already have a pre-existing Neovim configuration?
-  * You should back it up and then delete all associated files.
-  * This includes your existing init.lua and the Neovim files in `~/.local`
-    which can be deleted with `rm -rf ~/.local/share/nvim/`
-* Can I keep my existing configuration in parallel to kickstart?
-  * Yes! You can use [NVIM_APPNAME](https://neovim.io/doc/user/starting.html#%24NVIM_APPNAME)`=nvim-NAME`
-    to maintain multiple configurations. For example, you can install the kickstart
-    configuration in `~/.config/nvim-kickstart` and create an alias:
-    ```
-    alias nvim-kickstart='NVIM_APPNAME="nvim-kickstart" nvim'
-    ```
-    When you run Neovim using `nvim-kickstart` alias it will use the alternative
-    config directory and the matching local directory
-    `~/.local/share/nvim-kickstart`. You can apply this approach to any Neovim
-    distribution that you would like to try out.
-* What if I want to "uninstall" this configuration:
-  * See [lazy.nvim uninstall](https://lazy.folke.io/usage#-uninstalling) information
-* Why is the kickstart `init.lua` a single file? Wouldn't it make sense to split it into multiple files?
-  * The main purpose of kickstart is to serve as a teaching tool and a reference
-    configuration that someone can easily use to `git clone` as a basis for their own.
-    As you progress in learning Neovim and Lua, you might consider splitting `init.lua`
-    into smaller parts. A fork of kickstart that does this while maintaining the
-    same functionality is available here:
-    * [kickstart-modular.nvim](https://github.com/dam9000/kickstart-modular.nvim)
-  * Discussions on this topic can be found here:
-    * [Restructure the configuration](https://github.com/nvim-lua/kickstart.nvim/issues/218)
-    * [Reorganize init.lua into a multi-file setup](https://github.com/nvim-lua/kickstart.nvim/pull/473)
+### Tmux Customization
 
-### Install Recipes
+#### Change Weather Location
 
-Below you can find OS specific install instructions for Neovim and dependencies.
+Edit `.config/tmux-powerline/config.sh`:
 
-After installing all the dependencies continue with the [Install Kickstart](#Install-Kickstart) step.
+```bash
+# Find your location ID from https://www.yr.no/
+export TMUX_POWERLINE_SEG_WEATHER_LOCATION="11554"
+```
 
-#### Windows Installation
+#### Modify Status Bar Segments
 
-<details><summary>Windows with Microsoft C++ Build Tools and CMake</summary>
-Installation may require installing build tools and updating the run command for `telescope-fzf-native`
+Edit `.config/tmux-powerline/themes/gruvbox-dark.sh`:
 
-See `telescope-fzf-native` documentation for [more details](https://github.com/nvim-telescope/telescope-fzf-native.nvim#installation)
+```bash
+# Left side segments
+TMUX_POWERLINE_LEFT_STATUS_SEGMENTS=(
+    "tmux_session_info ${GRUVBOX_YELLOW} ${GRUVBOX_BG0}" \
+    "lan_ip ${GRUVBOX_BLUE} ${GRUVBOX_BG0}" \
+    # Add or remove segments here
+)
 
-This requires:
+# Right side segments
+TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS=(
+    "load ${GRUVBOX_BG2} ${GRUVBOX_RED}" \
+    # Add or remove segments here
+)
+```
 
-- Install CMake and the Microsoft C++ Build Tools on Windows
+#### Customize Colors
+
+Modify color variables in `.config/tmux-powerline/themes/gruvbox-dark.sh`:
+
+```bash
+readonly GRUVBOX_BG0="235"      # Background
+readonly GRUVBOX_FG1="223"      # Foreground
+readonly GRUVBOX_YELLOW="214"   # Accent colors
+# ... more colors
+```
+
+### Neovim Customization
+
+#### Add New Plugins
+
+Edit `lua/custom/plugins/` and add new plugin files:
 
 ```lua
-{'nvim-telescope/telescope-fzf-native.nvim', build = 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
-```
-</details>
-<details><summary>Windows with gcc/make using chocolatey</summary>
-Alternatively, one can install gcc and make which don't require changing the config,
-the easiest way is to use choco:
-
-1. install [chocolatey](https://chocolatey.org/install)
-either follow the instructions on the page or use winget,
-run in cmd as **admin**:
-```
-winget install --accept-source-agreements chocolatey.chocolatey
+-- lua/custom/plugins/my-plugin.lua
+return {
+  'author/plugin-name',
+  config = function()
+    -- Plugin configuration
+  end
+}
 ```
 
-2. install all requirements using choco, exit the previous cmd and
-open a new one so that choco path is set, and run in cmd as **admin**:
+#### Modify Theme
+
+Edit theme settings in your init.lua or plugin config.
+
+### Git Configuration
+
+Update user information in `.gitconfig`:
+
+```ini
+[user]
+    email = your-email@example.com
+    name = Your Name
 ```
-choco install -y neovim git ripgrep wget fd unzip gzip mingw make
+
+## 📖 Usage
+
+### Tmux Key Bindings
+
+| Key | Action |
+|-----|--------|
+| `Ctrl+a` | Prefix key (instead of Ctrl+b) |
+| `Prefix + c` | Create new window |
+| `Prefix + ,` | Rename window |
+| `Prefix + h/j/k/l` | Navigate panes (vim-style) |
+| `Prefix + r` | Reload tmux configuration |
+| `Prefix + [` | Enter copy mode (use vi keys) |
+| `Prefix + ]` | Paste from buffer |
+
+### Neovim Quick Start
+
+Launch Neovim and plugins will auto-install on first run:
+
+```bash
+nvim
 ```
-</details>
-<details><summary>WSL (Windows Subsystem for Linux)</summary>
+
+Common commands:
+- `:Lazy` - View plugin status
+- `:Mason` - Manage LSP servers
+- `:Telescope find_files` - Fuzzy file finder
+- `:NvimTreeToggle` - Toggle file explorer
+
+### Bash Aliases
+
+Useful aliases from `.bash_profile`:
+
+```bash
+ll          # Detailed file listing
+la          # List all files
+ducks       # Show largest files/folders
+c           # Clear screen
+up          # Go up one directory
+resrc       # Reload .bashrc
+```
+
+### Git Aliases
+
+From `.gitconfig`:
+
+```bash
+git lg      # Beautiful commit graph
+git ll      # Detailed log with changes
+git st      # Short status
+git br      # Branch list
+git co      # Checkout
+git ci      # Commit
+```
+
+## 🎯 Makefile Targets
+
+| Target | Description |
+|--------|-------------|
+| `make install-fonts` | Install Nerd Fonts via Homebrew |
+| `make test-smoke` | Quick Nerd Font verification |
+| `make test-unicode` | Comprehensive Unicode range test |
+| `make test-icons` | Categorized icon sets test |
+| `make test-all` | Run all font tests |
+| `make clean` | Clean up test artifacts |
+
+## 🔧 Troubleshooting
+
+### Powerline Symbols Not Showing
+
+1. **Verify Nerd Font is installed:**
+   ```bash
+   make test-smoke
+   ```
+
+2. **Check terminal font setting:**
+   - Must be set to a Nerd Font (e.g., "JetBrains Mono Nerd Font")
+   - Restart terminal after changing
+
+3. **Verify tmux-powerline config:**
+   ```bash
+   export TMUX_POWERLINE_PATCHED_FONT_IN_USE="true"
+   ```
+
+### Tmux Status Bar Not Updating
+
+1. **Reload tmux configuration:**
+   ```bash
+   tmux source-file ~/.tmux.conf
+   ```
+
+2. **Check tmux-powerline installation:**
+   ```bash
+   ls ~/.tmux/plugins/tmux-powerline
+   ```
+
+3. **Verify segments are executable:**
+   ```bash
+   chmod +x ~/.tmux/plugins/tmux-powerline/segments/*
+   ```
+
+### Neovim Plugins Not Loading
+
+1. **Lazy.nvim sync:**
+   ```vim
+   :Lazy sync
+   ```
+
+2. **Check for errors:**
+   ```vim
+   :Lazy log
+   ```
+
+3. **Clean and reinstall:**
+   ```bash
+   rm -rf ~/.local/share/nvim
+   nvim
+   ```
+
+### Network Segments Not Showing
+
+1. **Install ifstat for bandwidth:**
+   ```bash
+   brew install ifstat
+   ```
+
+2. **Set interface in config:**
+   Edit `.config/tmux-powerline/config.sh`:
+   ```bash
+   export TMUX_POWERLINE_SEG_IFSTAT_INTERFACE="en0"
+   ```
+
+## 📚 File Structure
 
 ```
-wsl --install
-wsl
-sudo add-apt-repository ppa:neovim-ppa/unstable -y
-sudo apt update
-sudo apt install make gcc ripgrep unzip git xclip neovim
+dotfile/
+├── .config/
+│   └── tmux-powerline/
+│       ├── config.sh              # Powerline configuration
+│       └── themes/
+│           └── gruvbox-dark.sh    # Custom theme
+├── .tests/
+│   ├── smoke-test.sh              # Quick font test
+│   ├── unicode-range-test.sh      # Unicode ranges
+│   ├── icon-sets-test.sh          # Categorized icons
+│   └── README.md                  # Test documentation
+├── lua/
+│   └── custom/
+│       └── plugins/               # Neovim plugins
+├── .bash_profile                  # Bash configuration
+├── .bashrc                        # Bash runtime config
+├── .gitconfig                     # Git configuration
+├── .gitignore                     # Git ignore rules
+├── .pdbrc                         # Python debugger config
+├── .pdbrc.py                      # Python debugger config (pdb++)
+├── .ptpython/                     # Enhanced Python REPL
+├── .tmux.conf                     # Tmux configuration
+├── .zshrc                         # Zsh configuration
+├── init.lua                       # Neovim entry point
+├── Makefile                       # Build and test targets
+└── README.md                      # This file
 ```
-</details>
 
-#### Linux Install
-<details><summary>Ubuntu Install Steps</summary>
+## 🎨 Color Scheme Reference
 
-```
-sudo add-apt-repository ppa:neovim-ppa/unstable -y
-sudo apt update
-sudo apt install make gcc ripgrep unzip git xclip neovim
-```
-</details>
-<details><summary>Debian Install Steps</summary>
-
-```
-sudo apt update
-sudo apt install make gcc ripgrep unzip git xclip curl
-
-# Now we install nvim
-curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz
-sudo rm -rf /opt/nvim-linux-x86_64
-sudo mkdir -p /opt/nvim-linux-x86_64
-sudo chmod a+rX /opt/nvim-linux-x86_64
-sudo tar -C /opt -xzf nvim-linux-x86_64.tar.gz
-
-# make it available in /usr/local/bin, distro installs to /usr/bin
-sudo ln -sf /opt/nvim-linux-x86_64/bin/nvim /usr/local/bin/
-```
-</details>
-<details><summary>Fedora Install Steps</summary>
+### Gruvbox Dark Palette
 
 ```
-sudo dnf install -y gcc make git ripgrep fd-find unzip neovim
-```
-</details>
+Background:  #282828 (dark0_hard)
+             #3c3836 (dark0)
+             #504945 (dark1)
 
-<details><summary>Arch Install Steps</summary>
+Foreground:  #ebdbb2 (light1)
+             #fbf1c7 (light0)
 
+Red:         #fb4934 (bright_red)
+Green:       #b8bb26 (bright_green)
+Yellow:      #fabd2f (bright_yellow)
+Blue:        #83a598 (bright_blue)
+Purple:      #d3869b (bright_purple)
+Aqua:        #8ec07c (bright_aqua)
+Orange:      #fe8019 (bright_orange)
 ```
-sudo pacman -S --noconfirm --needed gcc make git ripgrep fd unzip neovim
-```
-</details>
 
+## 🤝 Contributing
+
+This is a personal dotfiles repository, but suggestions and improvements are welcome!
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📝 License
+
+This configuration is provided as-is for personal use. Feel free to adapt and modify for your own needs.
+
+## 🙏 Acknowledgments
+
+- [Gruvbox](https://github.com/morhetz/gruvbox) - Color scheme
+- [tmux-powerline](https://github.com/erikw/tmux-powerline) - Status bar framework
+- [Nerd Fonts](https://www.nerdfonts.com/) - Iconic font aggregator
+- [lazy.nvim](https://github.com/folke/lazy.nvim) - Plugin manager
+- [Neovim](https://neovim.io/) - Hyperextensible Vim-based text editor
+
+## 📧 Contact
+
+For questions or issues, please open an issue on GitHub.
+
+---
+
+**Happy coding! 🚀**
