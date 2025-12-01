@@ -1,0 +1,68 @@
+[alias]
+    br = branch
+    ci = commit
+    co = checkout
+    diffr  = "!f() { git diff "$1"^.."$1"; }; f"
+    dl = "!git ll -1"
+    dlc = diff --cached HEAD^
+    dr  = "!f() { git diff "$1"^.."$1"; }; f"
+    f = "!git ls-files | grep -i"
+    filelog = log -u
+    fl = log -u
+    gr = grep -Ii
+    gra = "!f() { A=$(pwd) && TOPLEVEL=$(git rev-parse --show-toplevel) && cd $TOPLEVEL && git grep --full-name -In $1 | xargs -I{} echo $TOPLEVEL/{} && cd $A; }; f"
+    grep = grep -Ii
+    lc  = "!f() { git ll "$1"^.."$1"; }; f"
+    lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --
+    ll = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate --numstat
+    ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+    news = log -p HEAD@{1}..HEAD@{0}
+    r = reset
+    r1 = reset HEAD^
+    r2 = reset HEAD^^
+    rh = reset --hard
+    rh1 = reset HEAD^ --hard
+    rh2 = reset HEAD^^ --hard
+    st = status -s
+    d = difftool
+[user]
+	email = 163357823+amninder-narota@users.noreply.github.com
+	name = amninder-narota
+[color]
+    branch = auto
+    diff = auto
+    interactive = auto
+    status = auto
+[core]
+	autocrlf = false
+	editor = vim
+    fileMode = false
+    ignorecase = false
+[merge]
+    stat = true
+	tool = Kaleidoscope
+[credential]
+    helper = cache --timeout=3600
+[push]
+	default = current
+[url "https://github.com/"]
+    insteadOf = git://github.com/
+[pager]
+    show = vim -c '%sm/\\e.\\{-}m//ge' -c 'set ft=diff' -c 'normal gg' -c 'set buftype=nofile' -
+    diff = vim -c '%sm/\\e.\\{-}m//ge' -c 'set ft=diff' -c 'normal gg' -c 'set buftype=nofile' -
+[difftool]
+    prompt = false
+[diff]
+	tool = Kaleidoscope
+[difftool "Kaleidoscope"]
+	cmd = ksdiff --partial-changeset --relative-path \"$MERGED\" -- \"$LOCAL\" \"$REMOTE\"
+[mergetool "Kaleidoscope"]
+	cmd = ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+	trustExitCode = true
+[mergetool]
+	prompt = false
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
