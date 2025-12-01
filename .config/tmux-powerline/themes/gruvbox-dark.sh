@@ -78,22 +78,8 @@ if [ -z "${TMUX_POWERLINE_RIGHT_STATUS_SEGMENTS}" ]; then
 fi
 
 # ============================================================================
-# WINDOW STATUS (center)
+# WINDOW STATUS
 # ============================================================================
-# Format for current window
-if [ -z "${TMUX_POWERLINE_WINDOW_STATUS_CURRENT}" ]; then
-    TMUX_POWERLINE_WINDOW_STATUS_CURRENT=(
-        "#[fg=${GRUVBOX_FG3},bg=${GRUVBOX_BG1}] | " \
-        "#[fg=${GRUVBOX_BG0},bg=${GRUVBOX_YELLOW},bold]#I  #W" \
-        "#[fg=${GRUVBOX_FG3},bg=${GRUVBOX_BG1},nobold] | "
-    )
-fi
-
-# Format for other windows
-if [ -z "${TMUX_POWERLINE_WINDOW_STATUS_FORMAT}" ]; then
-    TMUX_POWERLINE_WINDOW_STATUS_FORMAT=(
-        "#[fg=${GRUVBOX_FG4},bg=${GRUVBOX_BG1}] | " \
-        "#[fg=${GRUVBOX_FG1},bg=${GRUVBOX_BG2}]#I  #W" \
-        "#[fg=${GRUVBOX_FG4},bg=${GRUVBOX_BG1}] | "
-    )
-fi
+# Window status is configured directly in .tmux.conf
+# See: set-window-option -g window-status-current-format
+# See: set-window-option -g window-status-format
