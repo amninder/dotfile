@@ -83,17 +83,17 @@ fi
 # Format for current window
 if [ -z "${TMUX_POWERLINE_WINDOW_STATUS_CURRENT}" ]; then
     TMUX_POWERLINE_WINDOW_STATUS_CURRENT=(
-        "#[fg=${GRUVBOX_BG1},bg=${GRUVBOX_YELLOW}]${TMUX_POWERLINE_SEPARATOR_RIGHT_BOLD}" \
-        "#[fg=${GRUVBOX_BG0},bg=${GRUVBOX_YELLOW},bold] #I  #W " \
-        "#[fg=${GRUVBOX_YELLOW},bg=${GRUVBOX_BG1},nobold]${TMUX_POWERLINE_SEPARATOR_RIGHT_BOLD}"
+        "#[fg=${GRUVBOX_FG3},bg=${GRUVBOX_BG1}] | " \
+        "#[fg=${GRUVBOX_BG0},bg=${GRUVBOX_YELLOW},bold]#I  #W" \
+        "#[fg=${GRUVBOX_FG3},bg=${GRUVBOX_BG1},nobold] | "
     )
 fi
 
 # Format for other windows
 if [ -z "${TMUX_POWERLINE_WINDOW_STATUS_FORMAT}" ]; then
     TMUX_POWERLINE_WINDOW_STATUS_FORMAT=(
-        "#[fg=${GRUVBOX_BG1},bg=${GRUVBOX_BG2}]${TMUX_POWERLINE_SEPARATOR_RIGHT_BOLD}" \
-        "#[fg=${GRUVBOX_FG1},bg=${GRUVBOX_BG2}] #I  #W " \
-        "#[fg=${GRUVBOX_BG2},bg=${GRUVBOX_BG1}]${TMUX_POWERLINE_SEPARATOR_RIGHT_BOLD}"
+        "#[fg=${GRUVBOX_FG4},bg=${GRUVBOX_BG1}] | " \
+        "#[fg=${GRUVBOX_FG1},bg=${GRUVBOX_BG2}]#I  #W" \
+        "#[fg=${GRUVBOX_FG4},bg=${GRUVBOX_BG1}] | "
     )
 fi
