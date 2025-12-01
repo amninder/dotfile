@@ -1,4 +1,4 @@
-.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link unlink purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh link-gitconfig clean-gitconfig help
+.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link unlink purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux clean-tmux link-gitconfig clean-gitconfig help
 
 NVIM_DIR := $(HOME)/.config/nvim
 BACKUP_DIR := $(HOME)/.config/nvim-backup-$(shell date +%Y%m%d-%H%M%S)
@@ -76,6 +76,8 @@ help:
 	@$(call print_help_item,"clean-zsh","- Remove ~/.zshrc symlink (safe)")
 	@$(call print_help_item,"install-oh-my-zsh","- Install Oh My Zsh framework")
 	@$(call print_help_item,"clean-oh-my-zsh","- Uninstall Oh My Zsh completely")
+	@$(call print_help_item,"install-tmux","- Install tmux and create ~/.tmux.conf symlink")
+	@$(call print_help_item,"clean-tmux","- Uninstall tmux and remove configuration","red")
 	@echo ""
 	@$(call print_colored,"Environment Variables:","yellow")
 	@$(call print_colored,"  NERD_FONTS   - Space-separated list of fonts to install","cyan")
@@ -127,7 +129,7 @@ update:
 	@nvim --headless "+Lazy! update" +qa 2>&1 | grep -v -E "(Not an editor command|Error detected while processing)" || true
 	@$(call print_colored,"✓ Plugins updated successfully")
 
-clean: clean-zsh clean-oh-my-zsh clean-gitconfig
+clean: clean-zsh clean-oh-my-zsh clean-tmux clean-gitconfig
 	@$(call print_colored,"Cleaning plugin cache...")
 	@nvim --headless "+Lazy! clean" +qa 2>&1 | grep -v -E "(Not an editor command|Error detected while processing)" || true
 	@$(call print_colored,"✓ Cache cleaned successfully")
@@ -442,6 +444,168 @@ clean-oh-my-zsh:
 		printf "\033[1;32m%s\033[0m\n" "✓ Oh My Zsh uninstalled successfully"; \
 	else \
 		printf "\033[1;32m%s\033[0m\n" "✓ Oh My Zsh is not installed"; \
+	fi
+
+install-tmux: install-brew
+ifeq ($(UNAME_S),Darwin)
+	@$(call print_colored,"Installing tmux on macOS...")
+	@if command -v tmux >/dev/null 2>&1; then \
+		printf "\033[1;32m%s\033[0m\n" "✓ tmux already installed"; \
+		tmux -V; \
+	else \
+		brew install tmux; \
+		printf "\033[1;32m%s\033[0m\n" "✓ tmux installed successfully"; \
+		tmux -V; \
+	fi
+else ifeq ($(UNAME_S),Linux)
+	@$(call print_colored,"Installing tmux on Linux...")
+	@if command -v tmux >/dev/null 2>&1; then \
+		printf "\033[1;32m%s\033[0m\n" "✓ tmux already installed"; \
+		tmux -V; \
+	else \
+		if [ -f /etc/os-release ]; then \
+			. /etc/os-release; \
+			case "$$ID" in \
+				ubuntu|debian) \
+					printf "%s\n" "Detected Debian/Ubuntu, using apt-get..."; \
+					sudo apt-get update && sudo apt-get install -y tmux; \
+					;; \
+				rhel|centos|fedora) \
+					printf "%s\n" "Detected RHEL/CentOS/Fedora..."; \
+					if command -v dnf >/dev/null 2>&1; then \
+						sudo dnf install -y tmux; \
+					else \
+						sudo yum install -y tmux; \
+					fi; \
+					;; \
+				arch) \
+					printf "%s\n" "Detected Arch Linux, using pacman..."; \
+					sudo pacman -S --noconfirm tmux; \
+					;; \
+				*) \
+					printf "\033[1;33m%s\033[0m\n" "⚠ Unknown distribution: $$ID"; \
+					printf "%s\n" "  Please install tmux manually"; \
+					exit 1; \
+					;; \
+			esac; \
+			printf "\033[1;32m%s\033[0m\n" "✓ tmux installed successfully"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Cannot detect distribution"; \
+			printf "%s\n" "  Please install tmux manually"; \
+			exit 1; \
+		fi \
+	fi
+else
+	@$(call print_colored,"⚠ Unsupported OS: $(UNAME_S)","red")
+	@$(call print_colored,"  Please install tmux manually","plain")
+endif
+	@$(call print_colored,"Verifying tmux installation...")
+	@if command -v tmux >/dev/null 2>&1; then \
+		printf "\033[1;32m%s\033[0m\n" "✓ tmux is installed and available"; \
+		$(call print_colored,"Creating symlink for .tmux.conf..."); \
+		if [ -L $(HOME)/.tmux.conf ]; then \
+			current_target=$$(readlink $(HOME)/.tmux.conf); \
+			if [ "$$current_target" = "$(CURDIR)/.tmux.conf" ]; then \
+				printf "\033[1;32m%s\033[0m\n" "✓ .tmux.conf symlink already points to $(CURDIR)/.tmux.conf"; \
+			else \
+				printf "\033[1;33m%s\033[0m\n" "⚠ .tmux.conf symlink exists but points to: $$current_target"; \
+				backup_file=$(HOME)/.tmux.conf-backup-$$(date +%Y%m%d-%H%M%S); \
+				printf "%s\n" "Creating backup at $$backup_file..."; \
+				mv $(HOME)/.tmux.conf $$backup_file; \
+				ln -s $(CURDIR)/.tmux.conf $(HOME)/.tmux.conf; \
+				printf "\033[1;32m%s\033[0m\n" "✓ .tmux.conf symlink created: $(HOME)/.tmux.conf -> $(CURDIR)/.tmux.conf"; \
+			fi \
+		elif [ -e $(HOME)/.tmux.conf ]; then \
+			backup_file=$(HOME)/.tmux.conf-backup-$$(date +%Y%m%d-%H%M%S); \
+			printf "%s\n" "Backing up existing .tmux.conf to $$backup_file..."; \
+			mv $(HOME)/.tmux.conf $$backup_file; \
+			ln -s $(CURDIR)/.tmux.conf $(HOME)/.tmux.conf; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Backup created at $$backup_file"; \
+			printf "\033[1;32m%s\033[0m\n" "✓ .tmux.conf symlink created: $(HOME)/.tmux.conf -> $(CURDIR)/.tmux.conf"; \
+		else \
+			ln -s $(CURDIR)/.tmux.conf $(HOME)/.tmux.conf; \
+			printf "\033[1;32m%s\033[0m\n" "✓ .tmux.conf symlink created: $(HOME)/.tmux.conf -> $(CURDIR)/.tmux.conf"; \
+		fi; \
+	else \
+		printf "\033[1;31m%s\033[0m\n" "✗ tmux is not installed on the system"; \
+		printf "\033[1;33m%s\033[0m\n" "⚠ Skipping symlink creation - please install tmux manually first"; \
+		exit 1; \
+	fi
+
+clean-tmux:
+	@$(call print_colored,"⚠ WARNING: This will remove tmux and its configuration!","red")
+	@$(call print_colored,"This includes:","red")
+	@$(call print_colored,"  - tmux installation (via package manager)","plain")
+	@$(call print_colored,"  - Configuration symlink (~/.tmux.conf)","plain")
+	@echo ""
+	@read -p "Are you sure? [y/N] " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		printf "%s\n" "Cleaning tmux..."; \
+		$(call print_colored,"Removing .tmux.conf symlink..."); \
+		if [ -L $(HOME)/.tmux.conf ]; then \
+			current_target=$$(readlink $(HOME)/.tmux.conf); \
+			if [ "$$current_target" = "$(CURDIR)/.tmux.conf" ]; then \
+				rm $(HOME)/.tmux.conf; \
+				printf "\033[1;32m%s\033[0m\n" "✓ Symlink removed: $(HOME)/.tmux.conf"; \
+			else \
+				printf "\033[1;33m%s\033[0m\n" "⚠ Symlink points to different location: $$current_target"; \
+				printf "%s\n" "  Not removing to prevent data loss"; \
+			fi \
+		elif [ -e $(HOME)/.tmux.conf ]; then \
+			printf "\033[1;33m%s\033[0m\n" "⚠ $(HOME)/.tmux.conf exists but is not a symlink"; \
+			printf "%s\n" "  Not removing to prevent data loss"; \
+		else \
+			printf "\033[1;32m%s\033[0m\n" "✓ No symlink found at $(HOME)/.tmux.conf"; \
+		fi; \
+		$(call print_colored,"Uninstalling tmux..."); \
+		if command -v tmux >/dev/null 2>&1; then \
+			if [ "$(UNAME_S)" = "Darwin" ]; then \
+				if command -v brew >/dev/null 2>&1; then \
+					brew uninstall tmux || printf "\033[1;33m%s\033[0m\n" "⚠ Failed to uninstall tmux via brew"; \
+					printf "\033[1;32m%s\033[0m\n" "✓ tmux uninstalled from macOS"; \
+				else \
+					printf "\033[1;33m%s\033[0m\n" "⚠ Homebrew not found, cannot uninstall tmux"; \
+				fi \
+			elif [ "$(UNAME_S)" = "Linux" ]; then \
+				if [ -f /etc/os-release ]; then \
+					. /etc/os-release; \
+					case "$$ID" in \
+						ubuntu|debian) \
+							sudo apt-get remove -y tmux && sudo apt-get autoremove -y; \
+							printf "\033[1;32m%s\033[0m\n" "✓ tmux uninstalled from Debian/Ubuntu"; \
+							;; \
+						rhel|centos|fedora) \
+							if command -v dnf >/dev/null 2>&1; then \
+								sudo dnf remove -y tmux; \
+							else \
+								sudo yum remove -y tmux; \
+							fi; \
+							printf "\033[1;32m%s\033[0m\n" "✓ tmux uninstalled from RHEL/CentOS/Fedora"; \
+							;; \
+						arch) \
+							sudo pacman -R --noconfirm tmux; \
+							printf "\033[1;32m%s\033[0m\n" "✓ tmux uninstalled from Arch Linux"; \
+							;; \
+						*) \
+							printf "\033[1;33m%s\033[0m\n" "⚠ Unknown distribution: $$ID"; \
+							printf "%s\n" "  Please uninstall tmux manually"; \
+							;; \
+					esac \
+				else \
+					printf "\033[1;33m%s\033[0m\n" "⚠ Cannot detect distribution"; \
+					printf "%s\n" "  Please uninstall tmux manually"; \
+				fi \
+			else \
+				printf "\033[1;33m%s\033[0m\n" "⚠ Unsupported OS: $(UNAME_S)"; \
+				printf "%s\n" "  Please uninstall tmux manually"; \
+			fi \
+		else \
+			printf "\033[1;32m%s\033[0m\n" "✓ tmux is not installed"; \
+		fi; \
+		printf "\033[1;32m%s\033[0m\n" "✓ tmux cleanup complete"; \
+	else \
+		printf "%s\n" "Cleanup cancelled"; \
 	fi
 
 install-fonts: install-brew
