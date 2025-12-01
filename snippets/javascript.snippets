@@ -1,0 +1,12 @@
+snippet rccf "React Native Function Component" b
+import React from 'react';
+import { $1 } from 'react-native'
+
+export default function ${2:`!v expand('%:t:r')`}(props) {
+    return (
+      <$1>
+      </$1>
+    )
+}
+
+endsnippet
