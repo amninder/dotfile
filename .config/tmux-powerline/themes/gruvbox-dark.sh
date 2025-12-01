@@ -29,8 +29,15 @@ TMUX_POWERLINE_DEFAULT_BACKGROUND_COLOR="${GRUVBOX_BG1}"
 TMUX_POWERLINE_DEFAULT_FOREGROUND_COLOR="${GRUVBOX_FG1}"
 
 # Separator configuration
-# Note: Separators are defined in config.sh
-# These settings in the theme will be overridden by config.sh values
+# Check if patched font is in use (set in config.sh)
+TMUX_POWERLINE_SEPARATOR_LEFT_BOLD=""
+TMUX_POWERLINE_SEPARATOR_LEFT_THIN=""
+TMUX_POWERLINE_SEPARATOR_RIGHT_BOLD=""
+TMUX_POWERLINE_SEPARATOR_RIGHT_THIN=""
+
+# Default separators for left and right sides
+TMUX_POWERLINE_DEFAULT_LEFTSIDE_SEPARATOR="${TMUX_POWERLINE_DEFAULT_LEFTSIDE_SEPARATOR:-$TMUX_POWERLINE_SEPARATOR_RIGHT_BOLD}"
+TMUX_POWERLINE_DEFAULT_RIGHTSIDE_SEPARATOR="${TMUX_POWERLINE_DEFAULT_RIGHTSIDE_SEPARATOR:-$TMUX_POWERLINE_SEPARATOR_LEFT_BOLD}"
 
 # ============================================================================
 # LEFT STATUS SEGMENTS
@@ -49,7 +56,7 @@ if [ -z "${TMUX_POWERLINE_LEFT_STATUS_SEGMENTS}" ]; then
         # Network segments - aqua/blue tones for connectivity
         "lan_ip ${GRUVBOX_BLUE} ${GRUVBOX_BG0}" \
         "wan_ip ${GRUVBOX_AQUA} ${GRUVBOX_BG0}" \
-        "ifstat ${GRUVBOX_BG3} ${GRUVBOX_AQUA}" \
+        "ifstat ${GRUVBOX_BG3} ${GRUVBOX_AQUA} ${TMUX_POWERLINE_SEPARATOR_LEFT_BOLD}" \
     )
 fi
 

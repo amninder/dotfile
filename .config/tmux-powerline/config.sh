@@ -22,10 +22,7 @@ export TMUX_POWERLINE_THEME="gruvbox-dark"
 # export TMUX_POWERLINE_SEPARATOR_RIGHT_THIN=""
 
 # ASCII fallback (works without special fonts):
-export TMUX_POWERLINE_SEPARATOR_LEFT_BOLD="◀"
-export TMUX_POWERLINE_SEPARATOR_LEFT_THIN="❮"
-export TMUX_POWERLINE_SEPARATOR_RIGHT_BOLD="▶"
-export TMUX_POWERLINE_SEPARATOR_RIGHT_THIN="❯"
+
 
 # Segment: date
 export TMUX_POWERLINE_SEG_DATE_FORMAT="%F"
@@ -39,7 +36,7 @@ export TMUX_POWERLINE_SEG_HOSTNAME_FORMAT="short"
 # Segment: weather
 # Set your location for weather - update this!
 # Visit https://www.yr.no/ and search for your location, then copy the location ID from the URL
-export TMUX_POWERLINE_SEG_WEATHER_LOCATION=""  # e.g., "2459115" for New York
+export TMUX_POWERLINE_SEG_WEATHER_LOCATION="11554"  # e.g., "2459115" for New York
 export TMUX_POWERLINE_SEG_WEATHER_DATA_PROVIDER="yrno"  # or "openweathermap"
 export TMUX_POWERLINE_SEG_WEATHER_UNIT="c"  # celsius
 
