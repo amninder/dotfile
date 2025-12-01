@@ -1,4 +1,4 @@
-.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux clean-tmux link-gitconfig clean-gitconfig help
+.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux install-tpm install-tmux-powerline clean-tmux clean-tmux-powerline link-gitconfig clean-gitconfig help
 
 NVIM_DIR := $(HOME)/.config/nvim
 BACKUP_DIR := $(HOME)/.config/nvim-backup-$(shell date +%Y%m%d-%H%M%S)
@@ -97,6 +97,14 @@ help:
 	@$(call print_help_item,"clean-oh-my-zsh","- Uninstall Oh My Zsh completely")
 	@$(call print_help_item,"install-tmux","- Install tmux and create ~/.tmux.conf symlink")
 	@printf '  \033[2m└─ install-brew\033[0m\n'
+	@$(call print_help_item,"install-tpm","- Install TPM (Tmux Plugin Manager)")
+	@printf '  \033[2m└─ install-tmux\033[0m\n'
+	@printf '     \033[2m└─ install-brew\033[0m\n'
+	@$(call print_help_item,"install-tmux-powerline","- Configure tmux-powerline with gruvbox theme")
+	@printf '  \033[2m└─ install-tpm\033[0m\n'
+	@printf '     \033[2m└─ install-tmux\033[0m\n'
+	@printf '        \033[2m└─ install-brew\033[0m\n'
+	@$(call print_help_item,"clean-tmux-powerline","- Remove tmux-powerline config symlink (safe)")
 	@$(call print_help_item,"clean-tmux","- Uninstall tmux and remove configuration","red")
 	@echo ""
 	@$(call print_colored,"Environment Variables:","yellow")
@@ -149,7 +157,7 @@ update:
 	@nvim --headless "+Lazy! update" +qa 2>&1 | grep -v -E "(Not an editor command|Error detected while processing)" || true
 	@$(call print_colored,"✓ Plugins updated successfully")
 
-clean: clean-zsh clean-oh-my-zsh clean-tmux clean-gitconfig
+clean: clean-zsh clean-oh-my-zsh clean-tmux clean-tmux-powerline clean-gitconfig
 	@$(call print_colored,"Cleaning plugin cache...")
 	@nvim --headless "+Lazy! clean" +qa 2>&1 | grep -v -E "(Not an editor command|Error detected while processing)" || true
 	@$(call print_colored,"✓ Cache cleaned successfully")
@@ -540,6 +548,9 @@ endif
 	@$(call print_colored,"Verifying tmux installation...")
 	@if command -v tmux >/dev/null 2>&1; then \
 		printf "\033[1;32m%s\033[0m\n" "✓ tmux is installed and available"; \
+		$(call print_colored,"Creating tmux config directory..."); \
+		mkdir -p $(HOME)/.config/tmux; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Config directory created at $(HOME)/.config/tmux"; \
 		$(call print_colored,"Creating symlink for .tmux.conf..."); \
 		if [ -L $(HOME)/.tmux.conf ]; then \
 			current_target=$$(readlink $(HOME)/.tmux.conf); \
@@ -569,6 +580,52 @@ endif
 		printf "\033[1;33m%s\033[0m\n" "⚠ Skipping symlink creation - please install tmux manually first"; \
 		exit 1; \
 	fi
+
+install-tpm: install-tmux
+	@$(call print_colored,"Installing TPM (Tmux Plugin Manager)...")
+	@if [ -d $(HOME)/.tmux/plugins/tpm ]; then \
+		printf "\033[1;32m%s\033[0m\n" "✓ TPM already installed at $(HOME)/.tmux/plugins/tpm"; \
+		cd $(HOME)/.tmux/plugins/tpm && git pull origin master; \
+		printf "\033[1;32m%s\033[0m\n" "✓ TPM updated to latest version"; \
+	else \
+		printf "%s\n" "Cloning TPM repository..."; \
+		git clone https://github.com/tmux-plugins/tpm $(HOME)/.tmux/plugins/tpm; \
+		printf "\033[1;32m%s\033[0m\n" "✓ TPM installed successfully at $(HOME)/.tmux/plugins/tpm"; \
+	fi
+	@$(call print_colored,"Installation complete! Reload tmux config and press prefix + I to install plugins","cyan")
+
+install-tmux-powerline: install-tpm
+	@$(call print_colored,"Configuring tmux-powerline with gruvbox theme...")
+	@if [ ! -d $(HOME)/.tmux/plugins/tmux-powerline ]; then \
+		printf "\033[1;33m%s\033[0m\n" "⚠ tmux-powerline not installed yet"; \
+		printf "%s\n" "  Please run: tmux source ~/.tmux.conf"; \
+		printf "%s\n" "  Then press prefix + I to install plugins"; \
+		exit 1; \
+	fi
+	@$(call print_colored,"Creating symlink for tmux-powerline config...")
+	@if [ -L $(HOME)/.config/tmux-powerline ]; then \
+		current_target=$$(readlink $(HOME)/.config/tmux-powerline); \
+		if [ "$$current_target" = "$(CURDIR)/.config/tmux-powerline" ]; then \
+			printf "\033[1;32m%s\033[0m\n" "✓ Config symlink already points to $(CURDIR)/.config/tmux-powerline"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Config symlink exists but points to: $$current_target"; \
+			backup_dir=$(HOME)/.config/tmux-powerline-backup-$$(date +%Y%m%d-%H%M%S); \
+			printf "%s\n" "Creating backup at $$backup_dir..."; \
+			mv $(HOME)/.config/tmux-powerline $$backup_dir; \
+			ln -s $(CURDIR)/.config/tmux-powerline $(HOME)/.config/tmux-powerline; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Config symlink created"; \
+		fi \
+	elif [ -e $(HOME)/.config/tmux-powerline ]; then \
+		backup_dir=$(HOME)/.config/tmux-powerline-backup-$$(date +%Y%m%d-%H%M%S); \
+		printf "%s\n" "Backing up existing config to $$backup_dir..."; \
+		mv $(HOME)/.config/tmux-powerline $$backup_dir; \
+		ln -s $(CURDIR)/.config/tmux-powerline $(HOME)/.config/tmux-powerline; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Backup created and symlink established"; \
+	else \
+		ln -s $(CURDIR)/.config/tmux-powerline $(HOME)/.config/tmux-powerline; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Config symlink created: $(HOME)/.config/tmux-powerline"; \
+	fi
+	@$(call print_colored,"Configuration complete! Remember to reload tmux config","cyan")
 
 clean-tmux:
 	@$(call print_colored,"⚠ WARNING: This will remove tmux and its configuration!","red")
@@ -644,6 +701,24 @@ clean-tmux:
 		printf "\033[1;32m%s\033[0m\n" "✓ tmux cleanup complete"; \
 	else \
 		printf "%s\n" "Cleanup cancelled"; \
+	fi
+
+clean-tmux-powerline:
+	@$(call print_colored,"Removing tmux-powerline config symlink...")
+	@if [ -L $(HOME)/.config/tmux-powerline ]; then \
+		current_target=$$(readlink $(HOME)/.config/tmux-powerline); \
+		if [ "$$current_target" = "$(CURDIR)/.config/tmux-powerline" ]; then \
+			rm $(HOME)/.config/tmux-powerline; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink removed: $(HOME)/.config/tmux-powerline"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Symlink points to different location: $$current_target"; \
+			printf "%s\n" "  Not removing to prevent data loss"; \
+		fi \
+	elif [ -e $(HOME)/.config/tmux-powerline ]; then \
+		printf "\033[1;33m%s\033[0m\n" "⚠ $(HOME)/.config/tmux-powerline exists but is not a symlink"; \
+		printf "%s\n" "  Not removing to prevent data loss"; \
+	else \
+		printf "\033[1;32m%s\033[0m\n" "✓ No symlink found at $(HOME)/.config/tmux-powerline"; \
 	fi
 
 install-fonts: install-brew
