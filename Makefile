@@ -1,4 +1,4 @@
-.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link unlink purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux clean-tmux link-gitconfig clean-gitconfig help
+.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux clean-tmux link-gitconfig clean-gitconfig help
 
 NVIM_DIR := $(HOME)/.config/nvim
 BACKUP_DIR := $(HOME)/.config/nvim-backup-$(shell date +%Y%m%d-%H%M%S)
@@ -60,11 +60,13 @@ help:
 	@printf '  \033[2m├─ clean-tmux\033[0m\n'
 	@printf '  \033[2m└─ clean-gitconfig\033[0m\n'
 	@$(call print_help_item,"backup","- Backup current configuration")
-	@$(call print_help_item,"link","- Create symlink from current directory to ~/.config/nvim")
+	@$(call print_help_item,"link","- Create all configuration symlinks")
+	@printf '  \033[2m├─ link-nvim\033[0m\n'
 	@printf '  \033[2m└─ link-gitconfig\033[0m\n'
+	@$(call print_help_item,"link-nvim","- Create symlink for ~/.config/nvim (requires nvim)")
 	@$(call print_help_item,"link-gitconfig","- Create symlink for ~/.gitconfig")
+	@$(call print_help_item,"clean-nvim","- Remove ~/.config/nvim symlink (safe)")
 	@$(call print_help_item,"clean-gitconfig","- Remove ~/.gitconfig symlink (safe)")
-	@$(call print_help_item,"unlink","- Remove symlink from ~/.config/nvim (safe)")
 	@$(call print_help_item,"purge-nvim","- Complete removal of Neovim and all data","red")
 	@$(call print_help_item,"install-fonts","- Install Nerd Fonts (macOS: via brew)")
 	@printf '  \033[2m└─ install-brew\033[0m\n'
@@ -157,25 +159,43 @@ backup:
 	@cp -r $(NVIM_DIR) $(BACKUP_DIR)
 	@$(call print_colored,"✓ Backup created at $(BACKUP_DIR)")
 
-link: link-gitconfig
+link: link-nvim link-gitconfig
+	@$(call print_colored,"✓ All symlinks created successfully","green")
+
+link-nvim:
+	@$(call print_colored,"Verifying Neovim installation...")
+	@if ! command -v nvim >/dev/null 2>&1; then \
+		printf "\033[1;31m%s\033[0m\n" "✗ Neovim is not installed on the system"; \
+		printf "\033[1;33m%s\033[0m\n" "⚠ Please install Neovim first using 'make install-nvim'"; \
+		exit 1; \
+	fi
+	@printf "\033[1;32m%s\033[0m\n" "✓ Neovim is installed"
 	@$(call print_colored,"Creating symlink to ~/.config/nvim...")
-	@if [ -e $(NVIM_DIR) ] || [ -L $(NVIM_DIR) ]; then \
-		if [ -L $(NVIM_DIR) ]; then \
-			current_target=$$(readlink $(NVIM_DIR)); \
-			if [ "$$current_target" = "$(CURDIR)" ]; then \
-				printf "\033[1;32m%s\033[0m\n" "✓ Symlink already points to $(CURDIR)"; \
-				exit 0; \
-			fi; \
-		fi; \
+	@mkdir -p $(HOME)/.config
+	@if [ -L $(NVIM_DIR) ]; then \
+		current_target=$$(readlink $(NVIM_DIR)); \
+		if [ "$$current_target" = "$(CURDIR)" ]; then \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink already points to $(CURDIR)"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Symlink exists but points to: $$current_target"; \
+			backup_dir=$(HOME)/.config/nvim-backup-$$(date +%Y%m%d-%H%M%S); \
+			printf "%s\n" "Creating backup at $$backup_dir..."; \
+			mv $(NVIM_DIR) $$backup_dir; \
+			ln -s $(CURDIR) $(NVIM_DIR); \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink created: $(NVIM_DIR) -> $(CURDIR)"; \
+		fi \
+	elif [ -e $(NVIM_DIR) ]; then \
 		printf "\033[1;33m%s\033[0m\n" "⚠ $(NVIM_DIR) already exists"; \
 		backup_dir=$(HOME)/.config/nvim-backup-$$(date +%Y%m%d-%H%M%S); \
 		printf "%s\n" "Creating backup at $$backup_dir..."; \
 		mv $(NVIM_DIR) $$backup_dir; \
+		ln -s $(CURDIR) $(NVIM_DIR); \
 		printf "\033[1;32m%s\033[0m\n" "✓ Backup created at $$backup_dir"; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Symlink created: $(NVIM_DIR) -> $(CURDIR)"; \
+	else \
+		ln -s $(CURDIR) $(NVIM_DIR); \
+		printf "\033[1;32m%s\033[0m\n" "✓ Symlink created: $(NVIM_DIR) -> $(CURDIR)"; \
 	fi
-	@mkdir -p $(HOME)/.config
-	@ln -s $(CURDIR) $(NVIM_DIR)
-	@$(call print_colored,"✓ Symlink created: $(NVIM_DIR) -> $(CURDIR)")
 
 link-gitconfig:
 	@$(call print_colored,"Creating symlink for .gitconfig...")
@@ -221,8 +241,8 @@ clean-gitconfig:
 		printf "\033[1;32m%s\033[0m\n" "✓ No symlink found at $(HOME)/.gitconfig"; \
 	fi
 
-unlink:
-	@$(call print_colored,"Removing symlink from ~/.config/nvim...")
+clean-nvim:
+	@$(call print_colored,"Removing ~/.config/nvim symlink...")
 	@if [ -L $(NVIM_DIR) ]; then \
 		current_target=$$(readlink $(NVIM_DIR)); \
 		if [ "$$current_target" = "$(CURDIR)" ]; then \
