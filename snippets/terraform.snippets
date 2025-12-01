@@ -1,0 +1,27 @@
+snippet r_kubernetes_ingress
+	resource "kubernetes_ingress" "${1}" {
+		metadata {
+			name        =
+			namespace   =
+			annotations = {}
+			labels      =
+		}
+		spec {
+
+		}
+	}
+
+snippet locals
+	locals {
+
+	}
+
+snippet tags
+	tags {
+	  ${1}
+	}
+
+snippet d_aws_eks_cluster_auth
+	data "aws_eks_cluster_auth" "${1}" {
+		name = "${2}"
+	}

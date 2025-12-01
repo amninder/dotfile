@@ -1,4 +1,4 @@
-.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link unlink purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all help
+.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link unlink purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh link-gitconfig clean-gitconfig help
 
 NVIM_DIR := $(HOME)/.config/nvim
 BACKUP_DIR := $(HOME)/.config/nvim-backup-$(shell date +%Y%m%d-%H%M%S)
@@ -54,6 +54,8 @@ help:
 	@$(call print_help_item,"clean","- Clean plugin cache and unused plugins")
 	@$(call print_help_item,"backup","- Backup current configuration")
 	@$(call print_help_item,"link","- Create symlink from current directory to ~/.config/nvim")
+	@$(call print_help_item,"link-gitconfig","- Create symlink for ~/.gitconfig")
+	@$(call print_help_item,"clean-gitconfig","- Remove ~/.gitconfig symlink (safe)")
 	@$(call print_help_item,"unlink","- Remove symlink from ~/.config/nvim (safe)")
 	@$(call print_help_item,"purge-nvim","- Complete removal of Neovim and all data","red")
 	@$(call print_help_item,"install-fonts","- Install Nerd Fonts (macOS: via brew)")
@@ -69,6 +71,11 @@ help:
 	@$(call print_help_item,"install-brew","- Install Homebrew (macOS only)")
 	@$(call print_help_item,"install-python","- Install Python development tools via Homebrew")
 	@$(call print_help_item,"install-dev-tools","- Install development tools (terraform-ls and typescript-language-server)")
+	@$(call print_help_item,"install-zsh","- Install Zsh shell (multi-OS support)")
+	@$(call print_help_item,"zsh-init","- Install Zsh and create ~/.zshrc symlink")
+	@$(call print_help_item,"clean-zsh","- Remove ~/.zshrc symlink (safe)")
+	@$(call print_help_item,"install-oh-my-zsh","- Install Oh My Zsh framework")
+	@$(call print_help_item,"clean-oh-my-zsh","- Uninstall Oh My Zsh completely")
 	@echo ""
 	@$(call print_colored,"Environment Variables:","yellow")
 	@$(call print_colored,"  NERD_FONTS   - Space-separated list of fonts to install","cyan")
@@ -120,7 +127,7 @@ update:
 	@nvim --headless "+Lazy! update" +qa 2>&1 | grep -v -E "(Not an editor command|Error detected while processing)" || true
 	@$(call print_colored,"✓ Plugins updated successfully")
 
-clean:
+clean: clean-zsh clean-oh-my-zsh clean-gitconfig
 	@$(call print_colored,"Cleaning plugin cache...")
 	@nvim --headless "+Lazy! clean" +qa 2>&1 | grep -v -E "(Not an editor command|Error detected while processing)" || true
 	@$(call print_colored,"✓ Cache cleaned successfully")
@@ -130,7 +137,7 @@ backup:
 	@cp -r $(NVIM_DIR) $(BACKUP_DIR)
 	@$(call print_colored,"✓ Backup created at $(BACKUP_DIR)")
 
-link:
+link: link-gitconfig
 	@$(call print_colored,"Creating symlink to ~/.config/nvim...")
 	@if [ -e $(NVIM_DIR) ] || [ -L $(NVIM_DIR) ]; then \
 		if [ -L $(NVIM_DIR) ]; then \
@@ -149,6 +156,50 @@ link:
 	@mkdir -p $(HOME)/.config
 	@ln -s $(CURDIR) $(NVIM_DIR)
 	@$(call print_colored,"✓ Symlink created: $(NVIM_DIR) -> $(CURDIR)")
+
+link-gitconfig:
+	@$(call print_colored,"Creating symlink for .gitconfig...")
+	@if [ -L $(HOME)/.gitconfig ]; then \
+		current_target=$$(readlink $(HOME)/.gitconfig); \
+		if [ "$$current_target" = "$(CURDIR)/.gitconfig" ]; then \
+			printf "\033[1;32m%s\033[0m\n" "✓ .gitconfig symlink already points to $(CURDIR)/.gitconfig"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ .gitconfig symlink exists but points to: $$current_target"; \
+			backup_file=$(HOME)/.gitconfig-backup-$$(date +%Y%m%d-%H%M%S); \
+			printf "%s\n" "Creating backup at $$backup_file..."; \
+			mv $(HOME)/.gitconfig $$backup_file; \
+			ln -s $(CURDIR)/.gitconfig $(HOME)/.gitconfig; \
+			printf "\033[1;32m%s\033[0m\n" "✓ .gitconfig symlink created: $(HOME)/.gitconfig -> $(CURDIR)/.gitconfig"; \
+		fi \
+	elif [ -e $(HOME)/.gitconfig ]; then \
+		backup_file=$(HOME)/.gitconfig-backup-$$(date +%Y%m%d-%H%M%S); \
+		printf "%s\n" "Backing up existing .gitconfig to $$backup_file..."; \
+		mv $(HOME)/.gitconfig $$backup_file; \
+		ln -s $(CURDIR)/.gitconfig $(HOME)/.gitconfig; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Backup created at $$backup_file"; \
+		printf "\033[1;32m%s\033[0m\n" "✓ .gitconfig symlink created: $(HOME)/.gitconfig -> $(CURDIR)/.gitconfig"; \
+	else \
+		ln -s $(CURDIR)/.gitconfig $(HOME)/.gitconfig; \
+		printf "\033[1;32m%s\033[0m\n" "✓ .gitconfig symlink created: $(HOME)/.gitconfig -> $(CURDIR)/.gitconfig"; \
+	fi
+
+clean-gitconfig:
+	@$(call print_colored,"Removing .gitconfig symlink...")
+	@if [ -L $(HOME)/.gitconfig ]; then \
+		current_target=$$(readlink $(HOME)/.gitconfig); \
+		if [ "$$current_target" = "$(CURDIR)/.gitconfig" ]; then \
+			rm $(HOME)/.gitconfig; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink removed: $(HOME)/.gitconfig"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Symlink points to different location: $$current_target"; \
+			printf "%s\n" "  Not removing to prevent data loss"; \
+		fi \
+	elif [ -e $(HOME)/.gitconfig ]; then \
+		printf "\033[1;33m%s\033[0m\n" "⚠ $(HOME)/.gitconfig exists but is not a symlink"; \
+		printf "%s\n" "  Not removing to prevent data loss"; \
+	else \
+		printf "\033[1;32m%s\033[0m\n" "✓ No symlink found at $(HOME)/.gitconfig"; \
+	fi
 
 unlink:
 	@$(call print_colored,"Removing symlink from ~/.config/nvim...")
@@ -232,6 +283,166 @@ install-dev-tools: install-brew
 		brew install $$tool || printf "\033[1;33m%s\033[0m\n" "⚠ Failed to install $$tool"; \
 	done
 	@$(call print_colored,"✓ Development tools installation complete")
+
+install-zsh: install-brew
+ifeq ($(UNAME_S),Darwin)
+	@$(call print_colored,"Installing Zsh on macOS...")
+	@if command -v zsh >/dev/null 2>&1; then \
+		printf "\033[1;32m%s\033[0m\n" "✓ Zsh already installed"; \
+		zsh --version; \
+	else \
+		brew install zsh; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Zsh installed successfully"; \
+		zsh --version; \
+	fi
+else ifeq ($(UNAME_S),Linux)
+	@$(call print_colored,"Installing Zsh on Linux...")
+	@if command -v zsh >/dev/null 2>&1; then \
+		printf "\033[1;32m%s\033[0m\n" "✓ Zsh already installed"; \
+		zsh --version; \
+	else \
+		if [ -f /etc/os-release ]; then \
+			. /etc/os-release; \
+			case "$$ID" in \
+				ubuntu|debian) \
+					printf "%s\n" "Detected Debian/Ubuntu, using apt-get..."; \
+					sudo apt-get update && sudo apt-get install -y zsh; \
+					;; \
+				rhel|centos|fedora) \
+					printf "%s\n" "Detected RHEL/CentOS/Fedora..."; \
+					if command -v dnf >/dev/null 2>&1; then \
+						sudo dnf install -y zsh; \
+					else \
+						sudo yum install -y zsh; \
+					fi; \
+					;; \
+				arch) \
+					printf "%s\n" "Detected Arch Linux, using pacman..."; \
+					sudo pacman -S --noconfirm zsh; \
+					;; \
+				*) \
+					printf "\033[1;33m%s\033[0m\n" "⚠ Unknown distribution: $$ID"; \
+					printf "%s\n" "  Please install zsh manually"; \
+					exit 1; \
+					;; \
+			esac; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Zsh installed successfully"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Cannot detect distribution"; \
+			printf "%s\n" "  Please install zsh manually"; \
+			exit 1; \
+		fi \
+	fi
+else
+	@$(call print_colored,"⚠ Unsupported OS: $(UNAME_S)","red")
+	@$(call print_colored,"  Please install Zsh manually","plain")
+endif
+
+zsh-init: install-zsh
+	@$(call print_colored,"Initializing Zsh configuration...")
+	@if command -v zsh >/dev/null 2>&1; then \
+		printf "\033[1;32m%s\033[0m\n" "Found zsh"; \
+	fi
+	@$(call print_colored,"Creating symlink for .zshrc...")
+	@if [ -L $(HOME)/.zshrc ]; then \
+		current_target=$$(readlink $(HOME)/.zshrc); \
+		if [ "$$current_target" = "$(CURDIR)/.zshrc" ]; then \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink already points to $(CURDIR)/.zshrc"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Symlink exists but points to: $$current_target"; \
+			backup_file=$(HOME)/.zshrc-backup-$$(date +%Y%m%d-%H%M%S); \
+			printf "%s\n" "Creating backup at $$backup_file..."; \
+			mv $(HOME)/.zshrc $$backup_file; \
+			ln -s $(CURDIR)/.zshrc $(HOME)/.zshrc; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink created: $(HOME)/.zshrc -> $(CURDIR)/.zshrc"; \
+		fi \
+	elif [ -e $(HOME)/.zshrc ]; then \
+		backup_file=$(HOME)/.zshrc-backup-$$(date +%Y%m%d-%H%M%S); \
+		printf "%s\n" "Backing up existing .zshrc to $$backup_file..."; \
+		mv $(HOME)/.zshrc $$backup_file; \
+		ln -s $(CURDIR)/.zshrc $(HOME)/.zshrc; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Backup created at $$backup_file"; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Symlink created: $(HOME)/.zshrc -> $(CURDIR)/.zshrc"; \
+	else \
+		ln -s $(CURDIR)/.zshrc $(HOME)/.zshrc; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Symlink created: $(HOME)/.zshrc -> $(CURDIR)/.zshrc"; \
+	fi
+
+clean-zsh:
+	@$(call print_colored,"Removing .zshrc symlink...")
+	@if [ -L $(HOME)/.zshrc ]; then \
+		current_target=$$(readlink $(HOME)/.zshrc); \
+		if [ "$$current_target" = "$(CURDIR)/.zshrc" ]; then \
+			rm $(HOME)/.zshrc; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink removed: $(HOME)/.zshrc"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Symlink points to different location: $$current_target"; \
+			printf "%s\n" "  Not removing to prevent data loss"; \
+		fi \
+	elif [ -e $(HOME)/.zshrc ]; then \
+		printf "\033[1;33m%s\033[0m\n" "⚠ $(HOME)/.zshrc exists but is not a symlink"; \
+		printf "%s\n" "  Not removing to prevent data loss"; \
+	else \
+		printf "\033[1;32m%s\033[0m\n" "✓ No symlink found at $(HOME)/.zshrc"; \
+	fi
+
+install-oh-my-zsh: install-zsh
+	@$(call print_colored,"Installing Oh My Zsh...")
+	@if [ -d $(HOME)/.oh-my-zsh ]; then \
+		printf "\033[1;32m%s\033[0m\n" "✓ Oh My Zsh already installed"; \
+	else \
+		printf "%s\n" "Downloading and installing Oh My Zsh..."; \
+		sh -c "$$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Oh My Zsh installed successfully"; \
+	fi
+	@$(call print_colored,"Setting up gentoo2 theme symlink...")
+	@if [ -L $(HOME)/.oh-my-zsh/themes/gentoo2.zsh-theme ]; then \
+		current_target=$$(readlink $(HOME)/.oh-my-zsh/themes/gentoo2.zsh-theme); \
+		if [ "$$current_target" = "$(CURDIR)/gentoo2.zsh-theme" ]; then \
+			printf "\033[1;32m%s\033[0m\n" "✓ Theme symlink already points to $(CURDIR)/gentoo2.zsh-theme"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Theme symlink exists but points to: $$current_target"; \
+		fi \
+	elif [ -e $(HOME)/.oh-my-zsh/themes/gentoo2.zsh-theme ]; then \
+		printf "\033[1;33m%s\033[0m\n" "⚠ Theme file exists but is not a symlink"; \
+	else \
+		ln -s $(CURDIR)/gentoo2.zsh-theme $(HOME)/.oh-my-zsh/themes/gentoo2.zsh-theme; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Theme symlink created: $(HOME)/.oh-my-zsh/themes/gentoo2.zsh-theme -> $(CURDIR)/gentoo2.zsh-theme"; \
+	fi
+	@$(call print_colored,"Setting up .zshrc symlink...")
+	@if [ -L $(HOME)/.zshrc ]; then \
+		current_target=$$(readlink $(HOME)/.zshrc); \
+		if [ "$$current_target" = "$(CURDIR)/.zshrc" ]; then \
+			printf "\033[1;32m%s\033[0m\n" "✓ .zshrc symlink already points to $(CURDIR)/.zshrc"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ .zshrc symlink exists but points to: $$current_target"; \
+			backup_file=$(HOME)/.zshrc-backup-$$(date +%Y%m%d-%H%M%S); \
+			printf "%s\n" "Creating backup at $$backup_file..."; \
+			mv $(HOME)/.zshrc $$backup_file; \
+			ln -s $(CURDIR)/.zshrc $(HOME)/.zshrc; \
+			printf "\033[1;32m%s\033[0m\n" "✓ .zshrc symlink created: $(HOME)/.zshrc -> $(CURDIR)/.zshrc"; \
+		fi \
+	elif [ -e $(HOME)/.zshrc ]; then \
+		backup_file=$(HOME)/.zshrc-backup-$$(date +%Y%m%d-%H%M%S); \
+		printf "%s\n" "Backing up existing .zshrc to $$backup_file..."; \
+		mv $(HOME)/.zshrc $$backup_file; \
+		ln -s $(CURDIR)/.zshrc $(HOME)/.zshrc; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Backup created at $$backup_file"; \
+		printf "\033[1;32m%s\033[0m\n" "✓ .zshrc symlink created: $(HOME)/.zshrc -> $(CURDIR)/.zshrc"; \
+	else \
+		ln -s $(CURDIR)/.zshrc $(HOME)/.zshrc; \
+		printf "\033[1;32m%s\033[0m\n" "✓ .zshrc symlink created: $(HOME)/.zshrc -> $(CURDIR)/.zshrc"; \
+	fi
+
+clean-oh-my-zsh:
+	@$(call print_colored,"Uninstalling Oh My Zsh...")
+	@if [ -d $(HOME)/.oh-my-zsh ]; then \
+		printf "%s\n" "Removing Oh My Zsh directory..."; \
+		rm -rf $(HOME)/.oh-my-zsh; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Oh My Zsh uninstalled successfully"; \
+	else \
+		printf "\033[1;32m%s\033[0m\n" "✓ Oh My Zsh is not installed"; \
+	fi
 
 install-fonts: install-brew
 ifeq ($(UNAME_S),Darwin)
