@@ -176,6 +176,117 @@ If you see boxes (□) or missing icons, ensure:
 2. Your terminal is configured to use it
 3. Terminal is restarted after font changes
 
+## 🛠️ Dev Utilities Installation
+
+Install modern CLI utilities to enhance your development workflow across macOS and Linux.
+
+### Quick Start
+
+```bash
+# Install all dev utilities
+make install-dev-utils
+```
+
+### Installed Utilities
+
+| Tool | Description | Usage |
+|------|-------------|-------|
+| **zoxide** | Smart directory navigation (cd replacement) | `z <partial-path>` |
+| **fzf** | Fuzzy finder for files and command history | `CTRL-R` (history), `CTRL-T` (files) |
+| **ripgrep** | Ultra-fast recursive search (grep alternative) | `rg <pattern>` |
+| **bat** | Syntax-highlighted file viewer (cat alternative) | `bat <file>` |
+| **eza** | Modern ls replacement with colors and icons | `eza -l` or `exa -l` |
+| **fd** | Simple, fast alternative to find | `fd <pattern>` |
+| **jq** | Command-line JSON processor | `echo '{"key":"value"}' | jq` |
+| **gh** | GitHub CLI for working with GitHub from terminal | `gh pr list` |
+| **ag** | The Silver Searcher - fast code searching tool | `ag <pattern>` |
+
+### Package Manager Support
+
+Automatic detection and installation across:
+- **macOS**: Homebrew
+- **Debian/Ubuntu**: apt-get
+- **RHEL/CentOS/Fedora**: dnf/yum
+- **Arch Linux**: pacman
+- **Alpine Linux**: apk
+
+Check detected package manager:
+```bash
+make detect-package-manager
+```
+
+### Special Notes
+
+**zoxide**: Not available in default repositories for most Linux distributions. The installer will provide manual installation instructions:
+```bash
+curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+```
+
+**eza vs exa**: On older distributions, `eza` may not be available and will fall back to `exa`.
+
+**fd**: Package name varies by distribution (`fd-find` on Debian/Ubuntu, `fd` elsewhere).
+
+### Docker Testing
+
+Test installation across multiple Linux distributions without affecting your system:
+
+```bash
+# Start test containers
+make test-docker-setup
+
+# Run installation tests on all distributions
+make test-docker-install
+
+# Stop containers
+make test-docker-teardown
+
+# Clean up completely (removes volumes)
+make test-docker-clean
+```
+
+**Tested distributions**:
+- Ubuntu 22.04 LTS
+- Debian 12 (Bookworm)
+- Fedora 39
+- CentOS Stream 9
+- Arch Linux (rolling)
+- Alpine Linux 3.19
+
+### Shell Integration
+
+After installation, add these to your `.zshrc` or `.bashrc`:
+
+```bash
+# zoxide (smart cd)
+eval "$(zoxide init zsh)"  # or 'bash' for bash
+
+# fzf key bindings (already sourced if installed via package manager)
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+```
+
+**Aliases** (optional):
+```bash
+alias cat='bat'
+alias ls='eza'
+alias ll='eza -l'
+alias la='eza -la'
+alias find='fd'
+```
+
+### Troubleshooting
+
+**Issue**: Package installation fails
+- **Solution**: Check your internet connection and package manager cache
+- Run `brew update` (macOS) or `sudo apt-get update` (Debian/Ubuntu)
+
+**Issue**: Permission denied errors
+- **Solution**: Linux installations require sudo privileges
+- Ensure your user is in the sudoers file
+
+**Issue**: Docker tests fail
+- **Solution**: Ensure Docker and Docker Compose are installed and running
+- Check Docker daemon: `docker ps`
+
 ## ⚙️ Configuration
 
 ### Tmux Customization
@@ -305,6 +416,7 @@ git ci      # Commit
 
 ## 🎯 Makefile Targets
 
+### Font & Testing
 | Target | Description |
 |--------|-------------|
 | `make install-fonts` | Install Nerd Fonts via Homebrew |
@@ -312,7 +424,25 @@ git ci      # Commit
 | `make test-unicode` | Comprehensive Unicode range test |
 | `make test-icons` | Categorized icon sets test |
 | `make test-all` | Run all font tests |
-| `make clean` | Clean up test artifacts |
+
+### Dev Utilities
+| Target | Description |
+|--------|-------------|
+| `make detect-package-manager` | Detect and display system package manager |
+| `make install-dev-utils` | Install dev utilities (zoxide, fzf, ripgrep, bat, eza, fd, jq, gh, ag) |
+
+### Docker Testing
+| Target | Description |
+|--------|-------------|
+| `make test-docker-setup` | Start Docker test containers (all Linux distros) |
+| `make test-docker-install` | Test installation in all Docker containers |
+| `make test-docker-teardown` | Stop and remove Docker containers |
+| `make test-docker-clean` | Remove containers and volumes (destructive) |
+
+### Cleanup
+| Target | Description |
+|--------|-------------|
+| `make clean` | Clean up test artifacts and symlinks |
 
 ## 🔧 Troubleshooting
 

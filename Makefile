@@ -1,4 +1,4 @@
-.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux install-tpm install-tmux-powerline clean-tmux clean-tmux-powerline link-gitconfig clean-gitconfig help
+.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux install-tpm install-tmux-powerline clean-tmux clean-tmux-powerline link-gitconfig clean-gitconfig detect-package-manager install-dev-utils test-docker-setup test-docker-install test-docker-teardown test-docker-clean help
 
 NVIM_DIR := $(HOME)/.config/nvim
 BACKUP_DIR := $(HOME)/.config/nvim-backup-$(shell date +%Y%m%d-%H%M%S)
@@ -18,6 +18,18 @@ PYTHON_PKGS := \
 DEV_TOOLS := \
 	terraform-ls \
 	typescript-language-server
+
+# Development utilities to install (modern CLI tools)
+DEV_UTILS := \
+	zoxide \
+	fzf \
+	ripgrep \
+	bat \
+	eza \
+	fd \
+	jq \
+	gh \
+	the_silver_searcher
 
 # Color printing function
 define print_colored
@@ -106,6 +118,15 @@ help:
 	@printf '        \033[2m└─ install-brew\033[0m\n'
 	@$(call print_help_item,"clean-tmux-powerline","- Remove tmux-powerline config symlink (safe)")
 	@$(call print_help_item,"clean-tmux","- Uninstall tmux and remove configuration","red")
+	@$(call print_help_item,"detect-package-manager","- Detect and display package manager")
+	@$(call print_help_item,"install-dev-utils","- Install dev utilities (zoxide, fzf, ripgrep, bat, eza, fd, jq, gh, ag)")
+	@echo ""
+	@$(call print_colored,"Docker Testing:","yellow")
+	@$(call print_help_item,"test-docker-setup","- Start Docker test containers (all Linux distros)")
+	@$(call print_help_item,"test-docker-install","- Test installation in all Docker containers")
+	@printf '  \033[2m└─ test-docker-setup\033[0m\n'
+	@$(call print_help_item,"test-docker-teardown","- Stop and remove Docker containers")
+	@$(call print_help_item,"test-docker-clean","- Remove containers and volumes (destructive)","red")
 	@echo ""
 	@$(call print_colored,"Environment Variables:","yellow")
 	@$(call print_colored,"  NERD_FONTS   - Space-separated list of fonts to install","cyan")
@@ -331,6 +352,286 @@ install-dev-tools: install-brew
 		brew install $$tool || printf "\033[1;33m%s\033[0m\n" "⚠ Failed to install $$tool"; \
 	done
 	@$(call print_colored,"✓ Development tools installation complete")
+
+detect-package-manager:
+	@$(call print_colored,"Detecting package manager...","cyan")
+ifeq ($(UNAME_S),Darwin)
+	@echo "brew"
+	@$(call print_colored,"✓ Detected: Homebrew (macOS)","green")
+else ifeq ($(UNAME_S),Linux)
+	@if [ -f /etc/os-release ]; then \
+		. /etc/os-release; \
+		case "$$ID" in \
+			ubuntu|debian) \
+				echo "apt-get"; \
+				printf "\033[1;32m%s\033[0m\n" "✓ Detected: apt-get ($$ID)"; \
+				;; \
+			rhel|centos|fedora) \
+				if command -v dnf >/dev/null 2>&1; then \
+					echo "dnf"; \
+					printf "\033[1;32m%s\033[0m\n" "✓ Detected: dnf ($$ID)"; \
+				else \
+					echo "yum"; \
+					printf "\033[1;32m%s\033[0m\n" "✓ Detected: yum ($$ID)"; \
+				fi; \
+				;; \
+			arch|manjaro) \
+				echo "pacman"; \
+				printf "\033[1;32m%s\033[0m\n" "✓ Detected: pacman ($$ID)"; \
+				;; \
+			alpine) \
+				echo "apk"; \
+				printf "\033[1;32m%s\033[0m\n" "✓ Detected: apk ($$ID)"; \
+				;; \
+			*) \
+				echo "unknown"; \
+				printf "\033[1;33m%s\033[0m\n" "⚠ Unknown distribution: $$ID"; \
+				printf "%s\n" "  Supported: ubuntu, debian, rhel, centos, fedora, arch, alpine"; \
+				;; \
+		esac; \
+	else \
+		echo "unknown"; \
+		printf "\033[1;33m%s\033[0m\n" "⚠ Cannot detect distribution (/etc/os-release not found)"; \
+		printf "%s\n" "  Please install utilities manually"; \
+	fi
+else
+	@echo "unsupported"
+	@$(call print_colored,"⚠ Unsupported OS: $(UNAME_S)","red")
+	@$(call print_colored,"  Supported: Darwin (macOS), Linux","plain")
+endif
+
+install-dev-utils:
+	@$(call print_colored,"Installing development utilities...","cyan")
+	@printf "%s\n" "Tools: zoxide, fzf, ripgrep, bat, eza, fd, jq, gh, ag"
+ifeq ($(UNAME_S),Darwin)
+	@$(call print_colored,"Using Homebrew for macOS...","plain")
+	@for util in $(DEV_UTILS); do \
+		printf "%s\n" "Checking $$util..."; \
+		if brew list $$util >/dev/null 2>&1; then \
+			printf "\033[1;32m%s\033[0m\n" "  ✓ $$util already installed"; \
+		else \
+			printf "%s\n" "  Installing $$util..."; \
+			brew install $$util || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install $$util"; \
+		fi; \
+	done
+	@$(call print_colored,"✓ macOS installation complete","green")
+else ifeq ($(UNAME_S),Linux)
+	@if [ -f /etc/os-release ]; then \
+		. /etc/os-release; \
+		case "$$ID" in \
+			ubuntu|debian) \
+				printf "\033[1;36m%s\033[0m\n" "Using apt-get for $$ID..."; \
+				printf "%s\n" "Updating package lists..."; \
+				sudo apt-get update -qq; \
+				printf "%s\n" "Installing fzf..."; \
+				sudo apt-get install -y fzf || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install fzf"; \
+				printf "%s\n" "Installing ripgrep..."; \
+				sudo apt-get install -y ripgrep || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install ripgrep"; \
+				printf "%s\n" "Installing bat..."; \
+				sudo apt-get install -y bat || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install bat"; \
+				printf "%s\n" "Installing exa (eza not in default repos)..."; \
+				sudo apt-get install -y exa || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install exa"; \
+				printf "%s\n" "Installing fd-find..."; \
+				sudo apt-get install -y fd-find || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install fd-find"; \
+				printf "%s\n" "Installing jq..."; \
+				sudo apt-get install -y jq || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install jq"; \
+				printf "%s\n" "Installing gh (GitHub CLI)..."; \
+				sudo apt-get install -y gh || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install gh"; \
+				printf "%s\n" "Installing silversearcher-ag..."; \
+				sudo apt-get install -y silversearcher-ag || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install silversearcher-ag"; \
+				printf "%s\n" "Checking zoxide..."; \
+				if command -v zoxide >/dev/null 2>&1; then \
+					printf "\033[1;32m%s\033[0m\n" "  ✓ zoxide already installed"; \
+				else \
+					printf "\033[1;33m%s\033[0m\n" "  ⚠ zoxide not available in apt repos"; \
+					printf "\033[1;36m%s\033[0m\n" "  → Install manually: curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash"; \
+				fi; \
+				printf "\033[1;32m%s\033[0m\n" "✓ Debian/Ubuntu installation complete"; \
+				;; \
+			rhel|centos|fedora) \
+				if command -v dnf >/dev/null 2>&1; then \
+					PKG_MGR="dnf"; \
+				else \
+					PKG_MGR="yum"; \
+				fi; \
+				printf "\033[1;36m%s\033[0m\n" "Using $$PKG_MGR for $$ID..."; \
+				printf "%s\n" "Installing fzf..."; \
+				sudo $$PKG_MGR install -y fzf || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install fzf"; \
+				printf "%s\n" "Installing ripgrep..."; \
+				sudo $$PKG_MGR install -y ripgrep || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install ripgrep"; \
+				printf "%s\n" "Installing bat..."; \
+				sudo $$PKG_MGR install -y bat || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install bat"; \
+				printf "%s\n" "Installing exa..."; \
+				sudo $$PKG_MGR install -y exa || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install exa"; \
+				printf "%s\n" "Installing fd-find..."; \
+				sudo $$PKG_MGR install -y fd-find || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install fd-find"; \
+				printf "%s\n" "Installing jq..."; \
+				sudo $$PKG_MGR install -y jq || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install jq"; \
+				printf "%s\n" "Installing gh (GitHub CLI)..."; \
+				sudo $$PKG_MGR install -y gh || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install gh"; \
+				printf "%s\n" "Installing the_silver_searcher..."; \
+				sudo $$PKG_MGR install -y the_silver_searcher || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install the_silver_searcher"; \
+				printf "%s\n" "Checking zoxide..."; \
+				if command -v zoxide >/dev/null 2>&1; then \
+					printf "\033[1;32m%s\033[0m\n" "  ✓ zoxide already installed"; \
+				else \
+					printf "\033[1;33m%s\033[0m\n" "  ⚠ zoxide not available in default repos"; \
+					printf "\033[1;36m%s\033[0m\n" "  → Install manually: curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash"; \
+				fi; \
+				printf "\033[1;32m%s\033[0m\n" "✓ RHEL/CentOS/Fedora installation complete"; \
+				;; \
+			arch|manjaro) \
+				printf "\033[1;36m%s\033[0m\n" "Using pacman for $$ID..."; \
+				printf "%s\n" "Installing fzf..."; \
+				sudo pacman -S --noconfirm --needed fzf || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install fzf"; \
+				printf "%s\n" "Installing ripgrep..."; \
+				sudo pacman -S --noconfirm --needed ripgrep || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install ripgrep"; \
+				printf "%s\n" "Installing bat..."; \
+				sudo pacman -S --noconfirm --needed bat || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install bat"; \
+				printf "%s\n" "Installing eza..."; \
+				sudo pacman -S --noconfirm --needed eza || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install eza"; \
+				printf "%s\n" "Installing fd..."; \
+				sudo pacman -S --noconfirm --needed fd || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install fd"; \
+				printf "%s\n" "Installing jq..."; \
+				sudo pacman -S --noconfirm --needed jq || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install jq"; \
+				printf "%s\n" "Installing github-cli..."; \
+				sudo pacman -S --noconfirm --needed github-cli || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install github-cli"; \
+				printf "%s\n" "Installing the_silver_searcher..."; \
+				sudo pacman -S --noconfirm --needed the_silver_searcher || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install the_silver_searcher"; \
+				printf "%s\n" "Installing zoxide..."; \
+				sudo pacman -S --noconfirm --needed zoxide || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install zoxide"; \
+				printf "\033[1;32m%s\033[0m\n" "✓ Arch Linux installation complete"; \
+				;; \
+			alpine) \
+				printf "\033[1;36m%s\033[0m\n" "Using apk for Alpine Linux..."; \
+				printf "%s\n" "Updating package index..."; \
+				sudo apk update; \
+				printf "%s\n" "Installing fzf..."; \
+				sudo apk add fzf || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install fzf"; \
+				printf "%s\n" "Installing ripgrep..."; \
+				sudo apk add ripgrep || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install ripgrep"; \
+				printf "%s\n" "Installing bat..."; \
+				sudo apk add bat || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install bat"; \
+				printf "%s\n" "Installing exa..."; \
+				sudo apk add exa || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install exa"; \
+				printf "%s\n" "Installing fd..."; \
+				sudo apk add fd || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install fd"; \
+				printf "%s\n" "Installing jq..."; \
+				sudo apk add jq || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install jq"; \
+				printf "%s\n" "Installing github-cli..."; \
+				sudo apk add github-cli || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install github-cli"; \
+				printf "%s\n" "Installing the_silver_searcher..."; \
+				sudo apk add the_silver_searcher || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install the_silver_searcher"; \
+				printf "%s\n" "Checking zoxide..."; \
+				if command -v zoxide >/dev/null 2>&1; then \
+					printf "\033[1;32m%s\033[0m\n" "  ✓ zoxide already installed"; \
+				else \
+					printf "\033[1;33m%s\033[0m\n" "  ⚠ zoxide not available in apk repos"; \
+					printf "\033[1;36m%s\033[0m\n" "  → Install manually: curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash"; \
+				fi; \
+				printf "\033[1;32m%s\033[0m\n" "✓ Alpine Linux installation complete"; \
+				;; \
+			*) \
+				printf "\033[1;31m%s\033[0m\n" "✗ Unknown distribution: $$ID"; \
+				printf "%s\n" "  Supported distributions:"; \
+				printf "%s\n" "    - Debian/Ubuntu (apt-get)"; \
+				printf "%s\n" "    - RHEL/CentOS/Fedora (dnf/yum)"; \
+				printf "%s\n" "    - Arch Linux (pacman)"; \
+				printf "%s\n" "    - Alpine Linux (apk)"; \
+				exit 1; \
+				;; \
+		esac; \
+	else \
+		printf "\033[1;31m%s\033[0m\n" "✗ Cannot detect Linux distribution"; \
+		printf "%s\n" "  /etc/os-release file not found"; \
+		exit 1; \
+	fi
+else
+	@$(call print_colored,"⚠ Unsupported OS: $(UNAME_S)","red")
+	@$(call print_colored,"  This target supports macOS and Linux only","plain")
+	@$(call print_colored,"  Please install utilities manually","plain")
+	@exit 1
+endif
+
+test-docker-setup:
+	@$(call print_colored,"Setting up Docker test environment...","cyan")
+	@if ! command -v docker >/dev/null 2>&1; then \
+		printf "\033[1;31m%s\033[0m\n" "✗ Docker is not installed"; \
+		printf "%s\n" "  Install Docker: https://docs.docker.com/get-docker/"; \
+		exit 1; \
+	fi
+	@if ! docker compose version >/dev/null 2>&1; then \
+		printf "\033[1;31m%s\033[0m\n" "✗ Docker Compose plugin not available"; \
+		printf "%s\n" "  Install Docker Compose: https://docs.docker.com/compose/install/"; \
+		exit 1; \
+	fi
+	@$(call print_colored,"Starting Docker containers...","plain")
+	@$(call print_colored,"  This may take a few minutes on first run","yellow")
+	@docker compose up -d
+	@$(call print_colored,"Waiting for containers to initialize...","plain")
+	@sleep 5
+	@$(call print_colored,"✓ Docker test environment ready","green")
+	@echo ""
+	@$(call print_colored,"Active containers:","cyan")
+	@docker compose ps
+
+test-docker-install:
+	@$(call print_colored,"Testing dev utilities installation across Linux distributions...","cyan")
+	@echo ""
+	@if ! docker compose ps 2>/dev/null | grep -q "Up"; then \
+		printf "\033[1;33m%s\033[0m\n" "⚠ Docker containers not running"; \
+		printf "%s\n" "  Run 'make test-docker-setup' first"; \
+		exit 1; \
+	fi
+	@$(call print_colored,"[1/6] Testing Ubuntu 22.04...","yellow")
+	@docker compose exec -T ubuntu bash -c "apt-get update -qq && apt-get install -qq -y sudo make curl && cd /dotfiles && make detect-package-manager && make install-dev-utils" && \
+		printf "\033[1;32m%s\033[0m\n" "✓ Ubuntu test passed" || \
+		printf "\033[1;31m%s\033[0m\n" "✗ Ubuntu test failed"
+	@echo ""
+	@$(call print_colored,"[2/6] Testing Debian 12...","yellow")
+	@docker compose exec -T debian bash -c "apt-get update -qq && apt-get install -qq -y sudo make curl && cd /dotfiles && make detect-package-manager && make install-dev-utils" && \
+		printf "\033[1;32m%s\033[0m\n" "✓ Debian test passed" || \
+		printf "\033[1;31m%s\033[0m\n" "✗ Debian test failed"
+	@echo ""
+	@$(call print_colored,"[3/6] Testing Fedora 39...","yellow")
+	@docker compose exec -T fedora bash -c "dnf install -y -q sudo make curl && cd /dotfiles && make detect-package-manager && make install-dev-utils" && \
+		printf "\033[1;32m%s\033[0m\n" "✓ Fedora test passed" || \
+		printf "\033[1;31m%s\033[0m\n" "✗ Fedora test failed"
+	@echo ""
+	@$(call print_colored,"[4/6] Testing CentOS Stream 9...","yellow")
+	@docker compose exec -T centos bash -c "dnf install -y -q sudo make curl && cd /dotfiles && make detect-package-manager && make install-dev-utils" && \
+		printf "\033[1;32m%s\033[0m\n" "✓ CentOS test passed" || \
+		printf "\033[1;31m%s\033[0m\n" "✗ CentOS test failed"
+	@echo ""
+	@$(call print_colored,"[5/6] Testing Arch Linux...","yellow")
+	@docker compose exec -T arch bash -c "pacman -Sy --noconfirm sudo make curl && cd /dotfiles && make detect-package-manager && make install-dev-utils" && \
+		printf "\033[1;32m%s\033[0m\n" "✓ Arch test passed" || \
+		printf "\033[1;31m%s\033[0m\n" "✗ Arch test failed"
+	@echo ""
+	@$(call print_colored,"[6/6] Testing Alpine Linux 3.19...","yellow")
+	@docker compose exec -T alpine sh -c "apk update -q && apk add -q sudo make bash curl && cd /dotfiles && make detect-package-manager && make install-dev-utils" && \
+		printf "\033[1;32m%s\033[0m\n" "✓ Alpine test passed" || \
+		printf "\033[1;31m%s\033[0m\n" "✗ Alpine test failed"
+	@echo ""
+	@$(call print_colored,"✓ All distribution tests complete","green")
+	@$(call print_colored,"Note: Warnings for zoxide manual installation are expected","yellow")
+
+test-docker-teardown:
+	@$(call print_colored,"Stopping Docker test environment...","cyan")
+	@docker compose down
+	@$(call print_colored,"✓ Docker containers stopped and removed","green")
+
+test-docker-clean:
+	@$(call print_colored,"⚠ WARNING: This will remove containers and volumes!","red")
+	@read -p "Are you sure? [y/N] " -n 1 -r; \
+	echo; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		printf "%s\n" "Cleaning Docker resources..."; \
+		docker compose down -v; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Docker cleanup complete"; \
+	else \
+		printf "%s\n" "Cleanup cancelled"; \
+	fi
 
 install-zsh: install-brew
 ifeq ($(UNAME_S),Darwin)
