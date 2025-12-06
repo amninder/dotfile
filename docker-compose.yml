@@ -1,0 +1,99 @@
+# Docker Compose configuration for testing dotfiles installation
+# across multiple Linux distributions
+#
+# Usage:
+#   make test-docker-setup    - Start all containers
+#   make test-docker-install  - Run installation tests
+#   make test-docker-teardown - Stop and remove containers
+
+services:
+  # Ubuntu 22.04 LTS (Jammy Jellyfish)
+  ubuntu:
+    image: ubuntu:22.04
+    platform: linux/amd64
+    container_name: dotfiles-test-ubuntu
+    working_dir: /dotfiles
+    volumes:
+      - .:/dotfiles:ro
+    command: tail -f /dev/null
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - TZ=UTC
+    networks:
+      - dotfiles-test
+
+  # Debian 12 (Bookworm)
+  debian:
+    image: debian:12
+    platform: linux/amd64
+    container_name: dotfiles-test-debian
+    working_dir: /dotfiles
+    volumes:
+      - .:/dotfiles:ro
+    command: tail -f /dev/null
+    environment:
+      - DEBIAN_FRONTEND=noninteractive
+      - TZ=UTC
+    networks:
+      - dotfiles-test
+
+  # Fedora 39
+  fedora:
+    image: fedora:39
+    platform: linux/amd64
+    container_name: dotfiles-test-fedora
+    working_dir: /dotfiles
+    volumes:
+      - .:/dotfiles:ro
+    command: tail -f /dev/null
+    environment:
+      - TZ=UTC
+    networks:
+      - dotfiles-test
+
+  # CentOS Stream 9 (latest RHEL-based)
+  centos:
+    image: quay.io/centos/centos:stream9
+    platform: linux/amd64
+    container_name: dotfiles-test-centos
+    working_dir: /dotfiles
+    volumes:
+      - .:/dotfiles:ro
+    command: tail -f /dev/null
+    environment:
+      - TZ=UTC
+    networks:
+      - dotfiles-test
+
+  # Arch Linux (rolling release)
+  arch:
+    image: archlinux:latest
+    platform: linux/amd64
+    container_name: dotfiles-test-arch
+    working_dir: /dotfiles
+    volumes:
+      - .:/dotfiles:ro
+    command: tail -f /dev/null
+    environment:
+      - TZ=UTC
+    networks:
+      - dotfiles-test
+
+  # Alpine Linux 3.19
+  alpine:
+    image: alpine:3.19
+    platform: linux/amd64
+    container_name: dotfiles-test-alpine
+    working_dir: /dotfiles
+    volumes:
+      - .:/dotfiles:ro
+    command: tail -f /dev/null
+    environment:
+      - TZ=UTC
+    networks:
+      - dotfiles-test
+
+networks:
+  dotfiles-test:
+    driver: bridge
+    name: dotfiles-test-network
