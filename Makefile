@@ -1084,28 +1084,26 @@ test-all:
 
 link-claude:
 	@$(call print_colored,"Creating symlink for Claude Code configuration...")
-	@if [ -L $(HOME)/.claude ]; then \
-		current_target=$$(readlink $(HOME)/.claude); \
-		if [ "$$current_target" = "$(CURDIR)/.claude" ]; then \
-			printf "\033[1;32m%s\033[0m\n" "✓ Symlink already points to $(CURDIR)/.claude"; \
+	@mkdir -p $(HOME)/.claude
+	@if [ -L $(HOME)/.claude/settings.json ]; then \
+		current_target=$$(readlink $(HOME)/.claude/settings.json); \
+		if [ "$$current_target" = "$(CURDIR)/.claude/settings.json" ]; then \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink already points to $(CURDIR)/.claude/settings.json"; \
 		else \
 			printf "\033[1;33m%s\033[0m\n" "⚠ Symlink exists but points to: $$current_target"; \
-			backup_dir=$(HOME)/.claude-backup-$$(date +%Y%m%d-%H%M%S); \
-			printf "%s\n" "Creating backup at $$backup_dir..."; \
-			mv $(HOME)/.claude $$backup_dir; \
-			ln -s $(CURDIR)/.claude $(HOME)/.claude; \
-			printf "\033[1;32m%s\033[0m\n" "✓ Symlink created: $(HOME)/.claude -> $(CURDIR)/.claude"; \
+			rm $(HOME)/.claude/settings.json; \
+			ln -s $(CURDIR)/.claude/settings.json $(HOME)/.claude/settings.json; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink updated: $(HOME)/.claude/settings.json -> $(CURDIR)/.claude/settings.json"; \
 		fi \
-	elif [ -e $(HOME)/.claude ]; then \
-		backup_dir=$(HOME)/.claude-backup-$$(date +%Y%m%d-%H%M%S); \
-		printf "%s\n" "Backing up existing .claude to $$backup_dir..."; \
-		mv $(HOME)/.claude $$backup_dir; \
-		ln -s $(CURDIR)/.claude $(HOME)/.claude; \
-		printf "\033[1;32m%s\033[0m\n" "✓ Backup created at $$backup_dir"; \
-		printf "\033[1;32m%s\033[0m\n" "✓ Symlink created: $(HOME)/.claude -> $(CURDIR)/.claude"; \
+	elif [ -e $(HOME)/.claude/settings.json ]; then \
+		backup_file=$(HOME)/.claude/settings.json.backup-$$(date +%Y%m%d-%H%M%S); \
+		printf "%s\n" "Backing up existing settings.json to $$backup_file..."; \
+		mv $(HOME)/.claude/settings.json $$backup_file; \
+		ln -s $(CURDIR)/.claude/settings.json $(HOME)/.claude/settings.json; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Backup created and symlink created"; \
 	else \
-		ln -s $(CURDIR)/.claude $(HOME)/.claude; \
-		printf "\033[1;32m%s\033[0m\n" "✓ Symlink created: $(HOME)/.claude -> $(CURDIR)/.claude"; \
+		ln -s $(CURDIR)/.claude/settings.json $(HOME)/.claude/settings.json; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Symlink created: $(HOME)/.claude/settings.json -> $(CURDIR)/.claude/settings.json"; \
 	fi
 
 clean-claude:
