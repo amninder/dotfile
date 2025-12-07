@@ -64,8 +64,8 @@ esac
 endef
 
 help:
-	@$(call print_colored,"Neovim Configuration Management","cyan")
-	@$(call print_colored,"================================","cyan")
+	@$(call print_colored,"Dotfiles Management","cyan")
+	@$(call print_colored,"===================","cyan")
 	@$(call print_help_item,"install-nvim","- Install Neovim (macOS: via brew)")
 	@printf '  \033[2m└─ install-brew\033[0m\n'
 	@$(call print_help_item,"install-nvim-plugins","- Install/sync all plugins via lazy.nvim")
