@@ -21,6 +21,10 @@ return {
       view = {
         width = 30,
       },
+      filters = {
+        dotfiles = false, -- Show hidden files (dotfiles)
+        git_ignored = false, -- Show git-ignored files
+      },
       actions = {
         open_file = {
           window_picker = {
