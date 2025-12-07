@@ -19,7 +19,7 @@ DEV_TOOLS := \
 	terraform-ls \
 	typescript-language-server
 
-# Development utilities to install (modern CLI tools)
+# Development utilities to install (cross-platform CLI tools)
 DEV_UTILS := \
 	zoxide \
 	fzf \
@@ -29,9 +29,13 @@ DEV_UTILS := \
 	fd \
 	jq \
 	gh \
-	the_silver_searcher \
+	the_silver_searcher
+
+# macOS-only development utilities (installed via Homebrew)
+DEV_UTILS_MAC := \
 	markdownlint-cli \
-	claude-code
+	claude-code \
+	reattach-to-user-namespace
 
 # Color printing function
 define print_colored
@@ -123,7 +127,7 @@ help:
 	@$(call print_help_item,"clean-tmux-powerline","- Remove tmux-powerline config symlink (safe)")
 	@$(call print_help_item,"clean-tmux","- Uninstall tmux and remove configuration","red")
 	@$(call print_help_item,"detect-package-manager","- Detect and display package manager")
-	@$(call print_help_item,"install-dev-utils","- Install dev utilities (zoxide, fzf, ripgrep, bat, eza, fd, jq, gh, ag, claude-code)")
+	@$(call print_help_item,"install-dev-utils","- Install dev utilities (zoxide, fzf, ripgrep, bat, eza, fd, jq, gh, ag + macOS: claude-code, reattach-to-user-namespace)")
 	@$(call print_help_item,"link-claude","- Create symlink for ~/.claude (Claude Code config)")
 	@$(call print_help_item,"clean-claude","- Remove ~/.claude symlink (safe)")
 	@echo ""
@@ -412,6 +416,16 @@ install-dev-utils:
 ifeq ($(UNAME_S),Darwin)
 	@$(call print_colored,"Using Homebrew for macOS...","plain")
 	@for util in $(DEV_UTILS); do \
+		printf "%s\n" "Checking $$util..."; \
+		if brew list $$util >/dev/null 2>&1; then \
+			printf "\033[1;32m%s\033[0m\n" "  ✓ $$util already installed"; \
+		else \
+			printf "%s\n" "  Installing $$util..."; \
+			brew install $$util || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install $$util"; \
+		fi; \
+	done
+	@$(call print_colored,"Installing macOS-only utilities...","plain")
+	@for util in $(DEV_UTILS_MAC); do \
 		printf "%s\n" "Checking $$util..."; \
 		if brew list $$util >/dev/null 2>&1; then \
 			printf "\033[1;32m%s\033[0m\n" "  ✓ $$util already installed"; \
