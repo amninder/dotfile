@@ -3,5 +3,6 @@
   "alwaysThinkingEnabled": true,
   "env": {
     "CLAUDE_CODE_NO_COMMIT_SIGNATURE": "1"
-  }
+  },
+  "commitMessageTrailer": false
 }
