@@ -1,4 +1,4 @@
-.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux install-tpm install-tmux-powerline clean-tmux clean-tmux-powerline link-gitconfig clean-gitconfig detect-package-manager install-dev-utils test-docker-setup test-docker-install test-docker-teardown test-docker-clean help
+.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux install-tpm install-tmux-powerline clean-tmux clean-tmux-powerline link-gitconfig clean-gitconfig detect-package-manager install-dev-utils test-docker-setup test-docker-install test-docker-teardown test-docker-clean link-claude clean-claude help
 
 NVIM_DIR := $(HOME)/.config/nvim
 BACKUP_DIR := $(HOME)/.config/nvim-backup-$(shell date +%Y%m%d-%H%M%S)
@@ -19,7 +19,7 @@ DEV_TOOLS := \
 	terraform-ls \
 	typescript-language-server
 
-# Development utilities to install (modern CLI tools)
+# Development utilities to install (cross-platform CLI tools)
 DEV_UTILS := \
 	zoxide \
 	fzf \
@@ -30,6 +30,12 @@ DEV_UTILS := \
 	jq \
 	gh \
 	the_silver_searcher
+
+# macOS-only development utilities (installed via Homebrew)
+DEV_UTILS_MAC := \
+	markdownlint-cli \
+	claude-code \
+	reattach-to-user-namespace
 
 # Color printing function
 define print_colored
@@ -58,8 +64,8 @@ esac
 endef
 
 help:
-	@$(call print_colored,"Neovim Configuration Management","cyan")
-	@$(call print_colored,"================================","cyan")
+	@$(call print_colored,"Dotfiles Management","cyan")
+	@$(call print_colored,"===================","cyan")
 	@$(call print_help_item,"install-nvim","- Install Neovim (macOS: via brew)")
 	@printf '  \033[2m└─ install-brew\033[0m\n'
 	@$(call print_help_item,"install-nvim-plugins","- Install/sync all plugins via lazy.nvim")
@@ -70,11 +76,13 @@ help:
 	@printf '  \033[2m├─ clean-zsh\033[0m\n'
 	@printf '  \033[2m├─ clean-oh-my-zsh\033[0m\n'
 	@printf '  \033[2m├─ clean-tmux\033[0m\n'
-	@printf '  \033[2m└─ clean-gitconfig\033[0m\n'
+	@printf '  \033[2m├─ clean-gitconfig\033[0m\n'
+	@printf '  \033[2m└─ clean-claude\033[0m\n'
 	@$(call print_help_item,"backup","- Backup current configuration")
 	@$(call print_help_item,"link","- Create all configuration symlinks")
 	@printf '  \033[2m├─ link-nvim\033[0m\n'
-	@printf '  \033[2m└─ link-gitconfig\033[0m\n'
+	@printf '  \033[2m├─ link-gitconfig\033[0m\n'
+	@printf '  \033[2m└─ link-claude\033[0m\n'
 	@$(call print_help_item,"link-nvim","- Create symlink for ~/.config/nvim (requires nvim)")
 	@$(call print_help_item,"link-gitconfig","- Create symlink for ~/.gitconfig")
 	@$(call print_help_item,"clean-nvim","- Remove ~/.config/nvim symlink (safe)")
@@ -119,7 +127,9 @@ help:
 	@$(call print_help_item,"clean-tmux-powerline","- Remove tmux-powerline config symlink (safe)")
 	@$(call print_help_item,"clean-tmux","- Uninstall tmux and remove configuration","red")
 	@$(call print_help_item,"detect-package-manager","- Detect and display package manager")
-	@$(call print_help_item,"install-dev-utils","- Install dev utilities (zoxide, fzf, ripgrep, bat, eza, fd, jq, gh, ag)")
+	@$(call print_help_item,"install-dev-utils","- Install dev utilities (zoxide, fzf, ripgrep, bat, eza, fd, jq, gh, ag + macOS: claude-code, reattach-to-user-namespace)")
+	@$(call print_help_item,"link-claude","- Create symlink for ~/.claude (Claude Code config)")
+	@$(call print_help_item,"clean-claude","- Remove ~/.claude symlink (safe)")
 	@echo ""
 	@$(call print_colored,"Docker Testing:","yellow")
 	@$(call print_help_item,"test-docker-setup","- Start Docker test containers (all Linux distros)")
@@ -178,7 +188,7 @@ update:
 	@nvim --headless "+Lazy! update" +qa 2>&1 | grep -v -E "(Not an editor command|Error detected while processing)" || true
 	@$(call print_colored,"✓ Plugins updated successfully")
 
-clean: clean-zsh clean-oh-my-zsh clean-tmux clean-tmux-powerline clean-gitconfig
+clean: clean-zsh clean-oh-my-zsh clean-tmux clean-tmux-powerline clean-gitconfig clean-claude
 	@$(call print_colored,"Cleaning plugin cache...")
 	@nvim --headless "+Lazy! clean" +qa 2>&1 | grep -v -E "(Not an editor command|Error detected while processing)" || true
 	@$(call print_colored,"✓ Cache cleaned successfully")
@@ -188,7 +198,7 @@ backup:
 	@cp -r $(NVIM_DIR) $(BACKUP_DIR)
 	@$(call print_colored,"✓ Backup created at $(BACKUP_DIR)")
 
-link: link-nvim link-gitconfig
+link: link-nvim link-gitconfig link-claude
 	@$(call print_colored,"✓ All symlinks created successfully","green")
 
 link-nvim:
@@ -406,6 +416,16 @@ install-dev-utils:
 ifeq ($(UNAME_S),Darwin)
 	@$(call print_colored,"Using Homebrew for macOS...","plain")
 	@for util in $(DEV_UTILS); do \
+		printf "%s\n" "Checking $$util..."; \
+		if brew list $$util >/dev/null 2>&1; then \
+			printf "\033[1;32m%s\033[0m\n" "  ✓ $$util already installed"; \
+		else \
+			printf "%s\n" "  Installing $$util..."; \
+			brew install $$util || printf "\033[1;33m%s\033[0m\n" "  ⚠ Failed to install $$util"; \
+		fi; \
+	done
+	@$(call print_colored,"Installing macOS-only utilities...","plain")
+	@for util in $(DEV_UTILS_MAC); do \
 		printf "%s\n" "Checking $$util..."; \
 		if brew list $$util >/dev/null 2>&1; then \
 			printf "\033[1;32m%s\033[0m\n" "  ✓ $$util already installed"; \
@@ -1075,3 +1095,45 @@ test-all:
 	@bash .tests/icon-sets-test.sh
 	@echo ""
 	@$(call print_colored,"All tests completed!","green")
+
+link-claude:
+	@$(call print_colored,"Creating symlink for Claude Code configuration...")
+	@mkdir -p $(HOME)/.claude
+	@if [ -L $(HOME)/.claude/settings.json ]; then \
+		current_target=$$(readlink $(HOME)/.claude/settings.json); \
+		if [ "$$current_target" = "$(CURDIR)/.claude/settings.json" ]; then \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink already points to $(CURDIR)/.claude/settings.json"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Symlink exists but points to: $$current_target"; \
+			rm $(HOME)/.claude/settings.json; \
+			ln -s $(CURDIR)/.claude/settings.json $(HOME)/.claude/settings.json; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink updated: $(HOME)/.claude/settings.json -> $(CURDIR)/.claude/settings.json"; \
+		fi \
+	elif [ -e $(HOME)/.claude/settings.json ]; then \
+		backup_file=$(HOME)/.claude/settings.json.backup-$$(date +%Y%m%d-%H%M%S); \
+		printf "%s\n" "Backing up existing settings.json to $$backup_file..."; \
+		mv $(HOME)/.claude/settings.json $$backup_file; \
+		ln -s $(CURDIR)/.claude/settings.json $(HOME)/.claude/settings.json; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Backup created and symlink created"; \
+	else \
+		ln -s $(CURDIR)/.claude/settings.json $(HOME)/.claude/settings.json; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Symlink created: $(HOME)/.claude/settings.json -> $(CURDIR)/.claude/settings.json"; \
+	fi
+
+clean-claude:
+	@$(call print_colored,"Removing .claude symlink...")
+	@if [ -L $(HOME)/.claude ]; then \
+		current_target=$$(readlink $(HOME)/.claude); \
+		if [ "$$current_target" = "$(CURDIR)/.claude" ]; then \
+			rm $(HOME)/.claude; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink removed: $(HOME)/.claude"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Symlink points to different location: $$current_target"; \
+			printf "%s\n" "  Not removing to prevent data loss"; \
+		fi \
+	elif [ -e $(HOME)/.claude ]; then \
+		printf "\033[1;33m%s\033[0m\n" "⚠ $(HOME)/.claude exists but is not a symlink"; \
+		printf "%s\n" "  Not removing to prevent data loss"; \
+	else \
+		printf "\033[1;32m%s\033[0m\n" "✓ No symlink found at $(HOME)/.claude"; \
+	fi
