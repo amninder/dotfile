@@ -1,4 +1,4 @@
-.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux install-tpm install-tmux-powerline clean-tmux clean-tmux-powerline link-gitconfig clean-gitconfig detect-package-manager install-dev-utils test-docker-setup test-docker-install test-docker-teardown test-docker-clean link-claude clean-claude help
+.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux install-tpm install-tmux-powerline clean-tmux clean-tmux-powerline link-gitconfig clean-gitconfig detect-package-manager install-dev-utils test-docker-setup test-docker-install test-docker-teardown test-docker-clean link-claude clean-claude link-taskrc clean-taskrc help
 
 NVIM_DIR := $(HOME)/.config/nvim
 BACKUP_DIR := $(HOME)/.config/nvim-backup-$(shell date +%Y%m%d-%H%M%S)
@@ -77,12 +77,14 @@ help:
 	@printf '  \033[2m├─ clean-oh-my-zsh\033[0m\n'
 	@printf '  \033[2m├─ clean-tmux\033[0m\n'
 	@printf '  \033[2m├─ clean-gitconfig\033[0m\n'
-	@printf '  \033[2m└─ clean-claude\033[0m\n'
+	@printf '  \033[2m├─ clean-claude\033[0m\n'
+	@printf '  \033[2m└─ clean-taskrc\033[0m\n'
 	@$(call print_help_item,"backup","- Backup current configuration")
 	@$(call print_help_item,"link","- Create all configuration symlinks")
 	@printf '  \033[2m├─ link-nvim\033[0m\n'
 	@printf '  \033[2m├─ link-gitconfig\033[0m\n'
-	@printf '  \033[2m└─ link-claude\033[0m\n'
+	@printf '  \033[2m├─ link-claude\033[0m\n'
+	@printf '  \033[2m└─ link-taskrc\033[0m\n'
 	@$(call print_help_item,"link-nvim","- Create symlink for ~/.config/nvim (requires nvim)")
 	@$(call print_help_item,"link-gitconfig","- Create symlink for ~/.gitconfig")
 	@$(call print_help_item,"clean-nvim","- Remove ~/.config/nvim symlink (safe)")
@@ -130,6 +132,8 @@ help:
 	@$(call print_help_item,"install-dev-utils","- Install dev utilities (zoxide, fzf, ripgrep, bat, eza, fd, jq, gh, ag + macOS: claude-code, reattach-to-user-namespace)")
 	@$(call print_help_item,"link-claude","- Create symlink for ~/.claude (Claude Code config)")
 	@$(call print_help_item,"clean-claude","- Remove ~/.claude symlink (safe)")
+	@$(call print_help_item,"link-taskrc","- Create symlink for ~/.taskrc (Taskwarrior config)")
+	@$(call print_help_item,"clean-taskrc","- Remove ~/.taskrc symlink (safe)")
 	@echo ""
 	@$(call print_colored,"Docker Testing:","yellow")
 	@$(call print_help_item,"test-docker-setup","- Start Docker test containers (all Linux distros)")
@@ -188,7 +192,7 @@ update:
 	@nvim --headless "+Lazy! update" +qa 2>&1 | grep -v -E "(Not an editor command|Error detected while processing)" || true
 	@$(call print_colored,"✓ Plugins updated successfully")
 
-clean: clean-zsh clean-oh-my-zsh clean-tmux clean-tmux-powerline clean-gitconfig clean-claude
+clean: clean-zsh clean-oh-my-zsh clean-tmux clean-tmux-powerline clean-gitconfig clean-claude clean-taskrc
 	@$(call print_colored,"Cleaning plugin cache...")
 	@nvim --headless "+Lazy! clean" +qa 2>&1 | grep -v -E "(Not an editor command|Error detected while processing)" || true
 	@$(call print_colored,"✓ Cache cleaned successfully")
@@ -198,7 +202,7 @@ backup:
 	@cp -r $(NVIM_DIR) $(BACKUP_DIR)
 	@$(call print_colored,"✓ Backup created at $(BACKUP_DIR)")
 
-link: link-nvim link-gitconfig link-claude
+link: link-nvim link-gitconfig link-claude link-taskrc
 	@$(call print_colored,"✓ All symlinks created successfully","green")
 
 link-nvim:
@@ -1136,4 +1140,80 @@ clean-claude:
 		printf "%s\n" "  Not removing to prevent data loss"; \
 	else \
 		printf "\033[1;32m%s\033[0m\n" "✓ No symlink found at $(HOME)/.claude"; \
+	fi
+
+link-taskrc:
+	@$(call print_colored,"Creating symlink for .taskrc...")
+	@if [ -L $(HOME)/.taskrc ]; then \
+		current_target=$$(readlink $(HOME)/.taskrc); \
+		if [ "$$current_target" = "$(CURDIR)/.taskrc" ]; then \
+			printf "\033[1;32m%s\033[0m\n" "✓ .taskrc symlink already points to $(CURDIR)/.taskrc"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ .taskrc symlink exists but points to: $$current_target"; \
+			backup_file=$(HOME)/.taskrc-backup-$$(date +%Y%m%d-%H%M%S); \
+			printf "%s\n" "Creating backup at $$backup_file..."; \
+			mv $(HOME)/.taskrc $$backup_file; \
+			ln -s $(CURDIR)/.taskrc $(HOME)/.taskrc; \
+			printf "\033[1;32m%s\033[0m\n" "✓ .taskrc symlink created: $(HOME)/.taskrc -> $(CURDIR)/.taskrc"; \
+		fi \
+	elif [ -e $(HOME)/.taskrc ]; then \
+		backup_file=$(HOME)/.taskrc-backup-$$(date +%Y%m%d-%H%M%S); \
+		printf "%s\n" "Backing up existing .taskrc to $$backup_file..."; \
+		mv $(HOME)/.taskrc $$backup_file; \
+		ln -s $(CURDIR)/.taskrc $(HOME)/.taskrc; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Backup created at $$backup_file"; \
+		printf "\033[1;32m%s\033[0m\n" "✓ .taskrc symlink created: $(HOME)/.taskrc -> $(CURDIR)/.taskrc"; \
+	else \
+		ln -s $(CURDIR)/.taskrc $(HOME)/.taskrc; \
+		printf "\033[1;32m%s\033[0m\n" "✓ .taskrc symlink created: $(HOME)/.taskrc -> $(CURDIR)/.taskrc"; \
+	fi
+	@$(call print_colored,"Creating symlink for Gruvbox theme...")
+	@mkdir -p $(HOME)/.task
+	@if [ -L $(HOME)/.task/gruvbox-dark.theme ]; then \
+		current_target=$$(readlink $(HOME)/.task/gruvbox-dark.theme); \
+		if [ "$$current_target" = "$(CURDIR)/.task/gruvbox-dark.theme" ]; then \
+			printf "\033[1;32m%s\033[0m\n" "✓ Theme symlink already points to $(CURDIR)/.task/gruvbox-dark.theme"; \
+		else \
+			rm $(HOME)/.task/gruvbox-dark.theme; \
+			ln -s $(CURDIR)/.task/gruvbox-dark.theme $(HOME)/.task/gruvbox-dark.theme; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Theme symlink updated"; \
+		fi \
+	elif [ -e $(HOME)/.task/gruvbox-dark.theme ]; then \
+		backup_file=$(HOME)/.task/gruvbox-dark.theme.backup-$$(date +%Y%m%d-%H%M%S); \
+		mv $(HOME)/.task/gruvbox-dark.theme $$backup_file; \
+		ln -s $(CURDIR)/.task/gruvbox-dark.theme $(HOME)/.task/gruvbox-dark.theme; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Theme symlink created (backup at $$backup_file)"; \
+	else \
+		ln -s $(CURDIR)/.task/gruvbox-dark.theme $(HOME)/.task/gruvbox-dark.theme; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Theme symlink created: $(HOME)/.task/gruvbox-dark.theme"; \
+	fi
+
+clean-taskrc:
+	@$(call print_colored,"Removing .taskrc symlink...")
+	@if [ -L $(HOME)/.taskrc ]; then \
+		current_target=$$(readlink $(HOME)/.taskrc); \
+		if [ "$$current_target" = "$(CURDIR)/.taskrc" ]; then \
+			rm $(HOME)/.taskrc; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Symlink removed: $(HOME)/.taskrc"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Symlink points to different location: $$current_target"; \
+			printf "%s\n" "  Not removing to prevent data loss"; \
+		fi \
+	elif [ -e $(HOME)/.taskrc ]; then \
+		printf "\033[1;33m%s\033[0m\n" "⚠ $(HOME)/.taskrc exists but is not a symlink"; \
+		printf "%s\n" "  Not removing to prevent data loss"; \
+	else \
+		printf "\033[1;32m%s\033[0m\n" "✓ No symlink found at $(HOME)/.taskrc"; \
+	fi
+	@$(call print_colored,"Removing theme symlink...")
+	@if [ -L $(HOME)/.task/gruvbox-dark.theme ]; then \
+		current_target=$$(readlink $(HOME)/.task/gruvbox-dark.theme); \
+		if [ "$$current_target" = "$(CURDIR)/.task/gruvbox-dark.theme" ]; then \
+			rm $(HOME)/.task/gruvbox-dark.theme; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Theme symlink removed"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Theme symlink points to different location"; \
+		fi \
+	else \
+		printf "\033[1;32m%s\033[0m\n" "✓ No theme symlink found"; \
 	fi
