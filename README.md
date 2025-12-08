@@ -107,6 +107,9 @@ ln -s ~/dotfile/.zshrc ~/.zshrc
 # Git
 ln -s ~/dotfile/.gitconfig ~/.gitconfig
 
+# Taskwarrior
+ln -s ~/dotfile/.taskrc ~/.taskrc
+
 # Python tools (optional)
 ln -s ~/dotfile/.pdbrc ~/.pdbrc
 ln -s ~/dotfile/.pdbrc.py ~/.pdbrc.py
@@ -534,6 +537,7 @@ dotfile/
 ├── .pdbrc                         # Python debugger config
 ├── .pdbrc.py                      # Python debugger config (pdb++)
 ├── .ptpython/                     # Enhanced Python REPL
+├── .taskrc                        # Taskwarrior configuration
 ├── .tmux.conf                     # Tmux configuration
 ├── .zshrc                         # Zsh configuration
 ├── init.lua                       # Neovim entry point

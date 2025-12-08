@@ -1,0 +1,44 @@
+# Taskwarrior configuration file
+# For more documentation, see https://taskwarrior.org/docs/
+
+# Data location
+data.location=~/.task
+
+# Color theme - Gruvbox Dark (matches tmux/nvim)
+include ~/.task/gruvbox-dark.theme
+
+# Default settings
+default.command=next
+weekstart=monday
+default.project=inbox
+
+# Reports
+report.next.columns=id,start.age,entry.age,depends,priority,project,tags,recur,scheduled.countdown,due.relative,until.remaining,description,urgency
+report.next.labels=ID,Active,Age,Deps,P,Project,Tag,Recur,S,Due,Until,Description,Urg
+
+# Urgency coefficients
+urgency.user.tag.next.coefficient=15.0
+urgency.due.coefficient=12.0
+urgency.blocking.coefficient=8.0
+urgency.active.coefficient=4.0
+urgency.scheduled.coefficient=5.0
+urgency.age.coefficient=2.0
+urgency.project.coefficient=1.0
+urgency.tags.coefficient=1.0
+
+# Context support
+context=none
+
+# Aliases
+alias.dailystatus=status:completed end.after:today all
+alias.rm=delete
+alias.p=projects
+
+# Date formats
+dateformat=Y-M-D
+dateformat.report=Y-M-D
+dateformat.annotation=Y-M-D
+
+# Confirmation
+confirmation=no
+bulk=3

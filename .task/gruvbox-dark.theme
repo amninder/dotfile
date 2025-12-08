@@ -1,0 +1,85 @@
+###############################################################################
+# Gruvbox Dark theme for Taskwarrior
+# Matches the Gruvbox palette used in tmux-powerline and Neovim configs
+#
+# Gruvbox 256-color palette:
+#   BG0=235 (#282828)  BG1=237 (#3c3836)  BG2=239 (#504945)
+#   BG3=241 (#665c54)  BG4=243 (#7c6f64)
+#   FG0=229 (#fbf1c7)  FG1=223 (#ebdbb2)  FG2=250 (#d5c4a1)
+#   FG3=248 (#bdae93)  FG4=246 (#a89984)
+#   RED=167    GREEN=142   YELLOW=214  BLUE=109
+#   PURPLE=175 AQUA=108    ORANGE=208
+###############################################################################
+
+rule.precedence.color=deleted,completed,active,keyword.,tag.,project.,overdue,scheduled,due.today,due,blocked,blocking,recurring,tagged,uda.
+
+# General decoration
+color.label=color246
+color.label.sort=color246
+color.alternate=on color235
+color.header=color214
+color.footnote=color246
+color.warning=color167 bold
+color.error=color229 on color167
+color.debug=color109
+
+# Task state
+color.completed=color241
+color.deleted=color241
+color.active=color229 on color100
+color.recurring=color108
+color.scheduled=on color237
+color.until=color246
+color.blocked=color246 on color239
+color.blocking=color235 on color214
+
+# Project
+color.project.none=color246
+
+# Priority - using warm colors
+color.uda.priority.H=color208 bold
+color.uda.priority.M=color214
+color.uda.priority.L=color246
+
+# Tags
+color.tag.next=color214 bold
+color.tag.none=
+color.tagged=color108
+
+# Due dates - red spectrum for urgency
+color.due.today=color167 bold
+color.due=color208
+color.overdue=color167 bold on color235
+
+# Report: burndown
+color.burndown.done=on color100
+color.burndown.pending=on color167
+color.burndown.started=on color214
+
+# Report: history
+color.history.add=color235 on color142
+color.history.delete=color235 on color167
+color.history.done=color235 on color108
+
+# Report: summary
+color.summary.background=color246 on color235
+color.summary.bar=color235 on color142
+
+# Command: calendar
+color.calendar.due.today=color229 on color167
+color.calendar.due=color235 on color208
+color.calendar.holiday=color235 on color214
+color.calendar.scheduled=on color237
+color.calendar.overdue=color229 on color167
+color.calendar.today=color229 on color109
+color.calendar.weekend=on color236
+color.calendar.weeknumber=color109
+
+# Command: sync
+color.sync.added=color142
+color.sync.changed=color214
+color.sync.rejected=color167
+
+# Command: undo
+color.undo.after=color142
+color.undo.before=color167
