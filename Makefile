@@ -1,4 +1,4 @@
-.PHONY: install-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux install-tpm install-tmux-powerline clean-tmux clean-tmux-powerline link-gitconfig clean-gitconfig detect-package-manager install-dev-utils test-docker-setup test-docker-install test-docker-teardown test-docker-clean link-claude clean-claude link-taskrc clean-taskrc help
+.PHONY: install-nvim install-nvim-deps uninstall-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux install-tpm install-tmux-powerline clean-tmux clean-tmux-powerline link-gitconfig clean-gitconfig detect-package-manager install-dev-utils test-docker-setup test-docker-install test-docker-teardown test-docker-clean link-claude clean-claude link-taskrc clean-taskrc help
 
 NVIM_DIR := $(HOME)/.config/nvim
 BACKUP_DIR := $(HOME)/.config/nvim-backup-$(shell date +%Y%m%d-%H%M%S)
@@ -66,8 +66,10 @@ endef
 help:
 	@$(call print_colored,"Dotfiles Management","cyan")
 	@$(call print_colored,"===================","cyan")
-	@$(call print_help_item,"install-nvim","- Install Neovim (macOS: via brew)")
+	@$(call print_help_item,"install-nvim","- Install Neovim (macOS: brew, Debian: from source, others: pkg mgr)")
 	@printf '  \033[2m└─ install-brew\033[0m\n'
+	@$(call print_help_item,"install-nvim-deps","- Install Neovim build dependencies (Debian/Ubuntu)")
+	@$(call print_help_item,"uninstall-nvim","- Uninstall Neovim (keeps config and data)")
 	@$(call print_help_item,"install-nvim-plugins","- Install/sync all plugins via lazy.nvim")
 	@printf '  \033[2m└─ install-nvim\033[0m\n'
 	@printf '     \033[2m└─ install-brew\033[0m\n'
@@ -158,6 +160,64 @@ ifeq ($(UNAME_S),Darwin)
 		brew install neovim; \
 		printf "\033[1;32m%s\033[0m\n" "✓ Neovim installed successfully"; \
 	fi
+else ifeq ($(UNAME_S),Linux)
+	@$(call print_colored,"Installing Neovim on Linux...")
+	@if command -v nvim >/dev/null 2>&1; then \
+		printf "\033[1;32m%s\033[0m\n" "✓ Neovim already installed"; \
+		nvim --version | head -1; \
+	else \
+		if [ -f /etc/os-release ]; then \
+			. /etc/os-release; \
+			case "$$ID" in \
+				ubuntu|debian) \
+					printf "%s\n" "Detected Debian/Ubuntu, building from source..."; \
+					printf "%s\n" "Installing build dependencies..."; \
+					sudo apt-get update && sudo apt-get install -y ninja-build gettext cmake curl build-essential; \
+					printf "%s\n" "Cloning neovim repository..."; \
+					rm -rf /tmp/neovim-build; \
+					git clone https://github.com/neovim/neovim.git /tmp/neovim-build; \
+					cd /tmp/neovim-build && git checkout stable; \
+					printf "%s\n" "Building neovim (this may take a few minutes)..."; \
+					cd /tmp/neovim-build && make CMAKE_BUILD_TYPE=RelWithDebInfo; \
+					printf "%s\n" "Installing neovim..."; \
+					cd /tmp/neovim-build && sudo make install; \
+					printf "%s\n" "Cleaning up build directory..."; \
+					rm -rf /tmp/neovim-build; \
+					;; \
+				rhel|centos|fedora) \
+					printf "%s\n" "Detected RHEL/CentOS/Fedora..."; \
+					if command -v dnf >/dev/null 2>&1; then \
+						sudo dnf install -y neovim; \
+					else \
+						sudo yum install -y neovim; \
+					fi; \
+					;; \
+				arch|manjaro) \
+					printf "%s\n" "Detected Arch Linux, using pacman..."; \
+					sudo pacman -S --noconfirm neovim; \
+					;; \
+				alpine) \
+					printf "%s\n" "Detected Alpine Linux, using apk..."; \
+					sudo apk add neovim; \
+					;; \
+				*) \
+					printf "\033[1;33m%s\033[0m\n" "⚠ Unknown distribution: $$ID"; \
+					printf "%s\n" "  Please install neovim manually"; \
+					exit 1; \
+					;; \
+			esac; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Neovim installed successfully"; \
+			nvim --version | head -1; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Cannot detect distribution"; \
+			printf "%s\n" "  Please install neovim manually"; \
+			exit 1; \
+		fi \
+	fi
+else
+	@$(call print_colored,"⚠ Please install Neovim manually on $(UNAME_S)","red")
+	@$(call print_colored,"  Visit: https://github.com/neovim/neovim/wiki/Installing-Neovim","plain")
+endif
 	@$(call print_colored,"Setting up configuration symlink...")
 	@mkdir -p $(HOME)/.config
 	@if [ -L $(NVIM_DIR) ]; then \
@@ -177,9 +237,69 @@ ifeq ($(UNAME_S),Darwin)
 		ln -s $(CURDIR) $(NVIM_DIR); \
 		printf "\033[1;32m%s\033[0m\n" "✓ Symlink created: $(NVIM_DIR) -> $(CURDIR)"; \
 	fi
+
+uninstall-nvim:
+	@$(call print_colored,"Uninstalling Neovim...")
+ifeq ($(UNAME_S),Darwin)
+	@if command -v brew >/dev/null 2>&1; then \
+		brew uninstall neovim || printf "\033[1;33m%s\033[0m\n" "⚠ Neovim not installed via brew"; \
+	else \
+		printf "\033[1;33m%s\033[0m\n" "⚠ Homebrew not found"; \
+	fi
+else ifeq ($(UNAME_S),Linux)
+	@if [ -f /etc/os-release ]; then \
+		. /etc/os-release; \
+		case "$$ID" in \
+			ubuntu|debian) \
+				printf "%s\n" "Uninstalling source-installed neovim..."; \
+				sudo rm -f /usr/local/bin/nvim; \
+				sudo rm -rf /usr/local/share/nvim; \
+				sudo rm -rf /usr/local/lib/nvim; \
+				printf "%s\n" "Also trying apt-get in case of package install..."; \
+				sudo apt-get remove -y neovim 2>/dev/null || true; \
+				;; \
+			rhel|centos|fedora) \
+				if command -v dnf >/dev/null 2>&1; then \
+					sudo dnf remove -y neovim; \
+				else \
+					sudo yum remove -y neovim; \
+				fi; \
+				;; \
+			arch|manjaro) \
+				sudo pacman -R --noconfirm neovim; \
+				;; \
+			alpine) \
+				sudo apk del neovim; \
+				;; \
+			*) \
+				printf "\033[1;33m%s\033[0m\n" "⚠ Unknown distribution: $$ID"; \
+				;; \
+		esac; \
+	fi
 else
-	@$(call print_colored,"⚠ Please install Neovim manually on $(UNAME_S)","red")
-	@$(call print_colored,"  Visit: https://github.com/neovim/neovim/wiki/Installing-Neovim","plain")
+	@$(call print_colored,"⚠ Unsupported OS: $(UNAME_S)","red")
+endif
+	@printf "\033[1;32m%s\033[0m\n" "✓ Neovim uninstalled"
+
+install-nvim-deps:
+	@$(call print_colored,"Installing Neovim build dependencies...")
+ifeq ($(UNAME_S),Linux)
+	@if [ -f /etc/os-release ]; then \
+		. /etc/os-release; \
+		case "$$ID" in \
+			ubuntu|debian) \
+				printf "%s\n" "Installing build dependencies for Debian/Ubuntu..."; \
+				sudo apt-get update && sudo apt-get install -y ninja-build gettext cmake curl build-essential; \
+				printf "\033[1;32m%s\033[0m\n" "✓ Build dependencies installed"; \
+				;; \
+			*) \
+				printf "\033[1;33m%s\033[0m\n" "⚠ This target is only for Debian/Ubuntu"; \
+				printf "%s\n" "  Other distributions use package managers for neovim"; \
+				;; \
+		esac; \
+	fi
+else
+	@$(call print_colored,"⚠ This target is only for Linux (Debian/Ubuntu)","yellow")
 endif
 
 install-nvim-plugins: install-nvim
