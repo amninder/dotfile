@@ -1,0 +1,178 @@
+servers = (
+  {
+    address = "irc.libera.chat";
+    chatnet = "liberachat";
+    port = "6697";
+    use_tls = "yes";
+    tls_verify = "yes";
+    autoconnect = "no";
+  },
+  {
+    address = "irc.oftc.net";
+    chatnet = "oftc";
+    port = "6697";
+    use_tls = "yes";
+    tls_verify = "yes";
+    autoconnect = "no";
+  }
+);
+
+chatnets = {
+  liberachat = {
+    type = "IRC";
+    nick = "guest";
+  };
+  oftc = {
+    type = "IRC";
+    nick = "guest";
+  };
+};
+
+channels = ( );
+
+aliases = {
+  j = "join";
+  leave = "part";
+  e = "exec - runz";
+  exp = "exec - runz";
+  exemp = "exec - runz";
+  date = "exec - date";
+  calc = "exec - expr";
+  n = "names";
+  b = "ban";
+  bans = "ban";
+  unban = "ban -";
+  mub = "unban *";
+  ub = "unban";
+  k = "kick";
+  kb = "kickban";
+  kn = "knockout";
+  knock = "quote knock";
+  cl = "clear";
+  q = "query";
+  wc = "window close";
+  w = "who";
+  m = "msg";
+  t = "topic";
+  c = "connect";
+  h = "help";
+  wi = "whois";
+  wii = "whois $0 $0";
+  ww = "whowas";
+  ns = "msg nickserv";
+  cs = "msg chanserv";
+  ms = "msg memoserv";
+  os = "msg operserv";
+  hs = "msg hostserv";
+  quote = "command";
+  saydate = "exec - sh -c \"date | sed 's/^/say /'\"";
+  up = "upgrade";
+  slap = "me slaps $0 around a bit with a large trout";
+};
+
+statusbar = {
+  items = {
+    barstart = "{sbstart}";
+    barend = "{sbend}";
+    topicbarstart = "{topicsbstart}";
+    topicbarend = "{topicsbend}";
+    time = "{sb $Z}";
+    user = "{sb {sbnickmode $cumode}$N{sbmode $usermode}{sbaway $A}}";
+    window = "{sb $winref:$tag/$itemname{sbmode $M}}";
+    window_empty = "{sb $winref{sbservertag $tag}}";
+    prompt = "{prompt $[.15]itemname}";
+    prompt_empty = "{prompt $winname}";
+    topic = " $topic";
+    topic_empty = " Irssi v$J - https://irssi.org";
+    lag = "{sb Lag: $0-}";
+    act = "{sb Act: $0-}";
+    more = "-- more --";
+  };
+
+  default = {
+    window = {
+      disabled = "no";
+      type = "window";
+      placement = "bottom";
+      position = "1";
+      visible = "active";
+      items = {
+        barstart = { priority = "100"; };
+        time = { };
+        user = { };
+        window = { };
+        window_empty = { };
+        lag = { priority = "-1"; };
+        act = { priority = "10"; };
+        more = { priority = "-1"; alignment = "right"; };
+        barend = { priority = "100"; alignment = "right"; };
+      };
+    };
+
+    window_inact = {
+      type = "window";
+      placement = "bottom";
+      position = "1";
+      visible = "inactive";
+      items = {
+        barstart = { priority = "100"; };
+        window = { };
+        window_empty = { };
+        more = { priority = "-1"; alignment = "right"; };
+        barend = { priority = "100"; alignment = "right"; };
+      };
+    };
+
+    prompt = {
+      type = "root";
+      placement = "bottom";
+      position = "100";
+      visible = "always";
+      items = {
+        prompt = { priority = "-1"; };
+        prompt_empty = { priority = "-1"; };
+        input = { priority = "10"; };
+      };
+    };
+
+    topic = {
+      type = "root";
+      placement = "top";
+      position = "1";
+      visible = "always";
+      items = {
+        topicbarstart = { priority = "100"; };
+        topic = { };
+        topic_empty = { };
+        topicbarend = { priority = "100"; alignment = "right"; };
+      };
+    };
+  };
+};
+
+settings = {
+  core = {
+    real_name = "Unknown";
+    user_name = "user";
+    nick = "guest";
+    timestamp_format = "%H:%M:%S";
+  };
+  "fe-text" = {
+    actlist_sort = "refnum";
+    term_force_colors = "yes";
+  };
+  "fe-common/core" = {
+    theme = "gruvbox-dark";
+    autolog = "no";
+    autolog_path = "~/.irssi/logs/$tag/$0.log";
+    timestamps = "yes";
+    hide_server_tags = "no";
+    completion_char = ":";
+    show_nickmode = "yes";
+    show_nickmode_empty = "yes";
+  };
+  "irc/core" = {
+    alternate_nick = "guest_";
+    skip_motd = "no";
+  };
+};
