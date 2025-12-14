@@ -1,4 +1,4 @@
-.PHONY: install-nvim install-nvim-deps uninstall-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux install-tpm install-tmux-powerline clean-tmux clean-tmux-powerline link-gitconfig clean-gitconfig detect-package-manager install-dev-utils test-docker-setup test-docker-install test-docker-teardown test-docker-clean link-claude clean-claude link-taskrc clean-taskrc help
+.PHONY: install-nvim install-nvim-deps uninstall-nvim install-nvim-plugins update clean backup install-fonts install-brew install-python install-dev-tools link link-nvim clean-nvim purge-nvim test-nerd-fonts test-smoke test-unicode test-icons test-all install-zsh zsh-init clean-zsh install-oh-my-zsh clean-oh-my-zsh install-tmux install-tpm install-tmux-powerline clean-tmux clean-tmux-powerline link-gitconfig clean-gitconfig detect-package-manager install-dev-utils install-irssi link-irssi clean-irssi test-docker-setup test-docker-install test-docker-teardown test-docker-clean link-claude clean-claude link-taskrc clean-taskrc help
 
 NVIM_DIR := $(HOME)/.config/nvim
 BACKUP_DIR := $(HOME)/.config/nvim-backup-$(shell date +%Y%m%d-%H%M%S)
@@ -68,7 +68,7 @@ help:
 	@$(call print_colored,"===================","cyan")
 	@$(call print_help_item,"install-nvim","- Install Neovim (macOS: brew, Debian: from source, others: pkg mgr)")
 	@printf '  \033[2m└─ install-brew\033[0m\n'
-	@$(call print_help_item,"install-nvim-deps","- Install Neovim build dependencies (Debian/Ubuntu)")
+	@$(call print_help_item,"install-nvim-deps","- Install Neovim build deps + unzip + rustup (Debian/Ubuntu)")
 	@$(call print_help_item,"uninstall-nvim","- Uninstall Neovim (keeps config and data)")
 	@$(call print_help_item,"install-nvim-plugins","- Install/sync all plugins via lazy.nvim")
 	@printf '  \033[2m└─ install-nvim\033[0m\n'
@@ -132,6 +132,9 @@ help:
 	@$(call print_help_item,"clean-tmux","- Uninstall tmux and remove configuration","red")
 	@$(call print_help_item,"detect-package-manager","- Detect and display package manager")
 	@$(call print_help_item,"install-dev-utils","- Install dev utilities (zoxide, fzf, ripgrep, bat, eza, fd, jq, gh, ag + macOS: claude-code, reattach-to-user-namespace)")
+	@$(call print_help_item,"install-irssi","- Install irssi IRC client")
+	@$(call print_help_item,"link-irssi","- Create symlinks for irssi config and gruvbox theme")
+	@$(call print_help_item,"clean-irssi","- Remove irssi config and theme symlinks (safe)")
 	@$(call print_help_item,"link-claude","- Create symlink for ~/.claude (Claude Code config)")
 	@$(call print_help_item,"clean-claude","- Remove ~/.claude symlink (safe)")
 	@$(call print_help_item,"link-taskrc","- Create symlink for ~/.taskrc (Taskwarrior config)")
@@ -282,15 +285,23 @@ endif
 	@printf "\033[1;32m%s\033[0m\n" "✓ Neovim uninstalled"
 
 install-nvim-deps:
-	@$(call print_colored,"Installing Neovim build dependencies...")
+	@$(call print_colored,"Installing Neovim build and plugin dependencies...")
 ifeq ($(UNAME_S),Linux)
 	@if [ -f /etc/os-release ]; then \
 		. /etc/os-release; \
 		case "$$ID" in \
 			ubuntu|debian) \
 				printf "%s\n" "Installing build dependencies for Debian/Ubuntu..."; \
-				sudo apt-get update && sudo apt-get install -y ninja-build gettext cmake curl build-essential; \
+				sudo apt-get update && sudo apt-get install -y ninja-build gettext cmake curl build-essential unzip; \
 				printf "\033[1;32m%s\033[0m\n" "✓ Build dependencies installed"; \
+				printf "%s\n" "Installing Rust toolchain via rustup..."; \
+				if command -v rustup >/dev/null 2>&1; then \
+					printf "\033[1;32m%s\033[0m\n" "✓ Rust already installed"; \
+					rustc --version; \
+				else \
+					curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y; \
+					printf "\033[1;32m%s\033[0m\n" "✓ Rust toolchain installed"; \
+				fi; \
 				;; \
 			*) \
 				printf "\033[1;33m%s\033[0m\n" "⚠ This target is only for Debian/Ubuntu"; \
@@ -696,6 +707,128 @@ else
 	@$(call print_colored,"  Please install utilities manually","plain")
 	@exit 1
 endif
+
+install-irssi:
+	@$(call print_colored,"Installing irssi IRC client...","cyan")
+ifeq ($(UNAME_S),Darwin)
+	@if command -v irssi >/dev/null 2>&1; then \
+		printf "\033[1;32m%s\033[0m\n" "✓ irssi already installed"; \
+		irssi --version; \
+	else \
+		brew install irssi; \
+		printf "\033[1;32m%s\033[0m\n" "✓ irssi installed successfully"; \
+	fi
+else ifeq ($(UNAME_S),Linux)
+	@if command -v irssi >/dev/null 2>&1; then \
+		printf "\033[1;32m%s\033[0m\n" "✓ irssi already installed"; \
+		irssi --version; \
+	else \
+		if [ -f /etc/os-release ]; then \
+			. /etc/os-release; \
+			case "$$ID" in \
+				ubuntu|debian) \
+					sudo apt-get update && sudo apt-get install -y irssi || exit 1; \
+					;; \
+				rhel|centos|fedora) \
+					if command -v dnf >/dev/null 2>&1; then \
+						sudo dnf install -y irssi || exit 1; \
+					else \
+						sudo yum install -y irssi || exit 1; \
+					fi; \
+					;; \
+				arch|manjaro) \
+					sudo pacman -S --noconfirm irssi || exit 1; \
+					;; \
+				alpine) \
+					sudo apk add irssi || exit 1; \
+					;; \
+				*) \
+					printf "\033[1;33m%s\033[0m\n" "⚠ Unknown distribution: $$ID"; \
+					printf "%s\n" "  Please install irssi manually"; \
+					exit 1; \
+					;; \
+			esac; \
+			printf "\033[1;32m%s\033[0m\n" "✓ irssi installed successfully"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Cannot detect distribution"; \
+			exit 1; \
+		fi \
+	fi
+else
+	@$(call print_colored,"⚠ Unsupported OS: $(UNAME_S)","red")
+endif
+
+link-irssi:
+	@$(call print_colored,"Setting up irssi configuration...")
+	@mkdir -p $(HOME)/.irssi
+	@$(call print_colored,"Linking config file...")
+	@if [ -L $(HOME)/.irssi/config ]; then \
+		current_target=$$(readlink $(HOME)/.irssi/config); \
+		if [ "$$current_target" = "$(CURDIR)/.irssi/config" ]; then \
+			printf "\033[1;32m%s\033[0m\n" "✓ Config symlink already points to $(CURDIR)/.irssi/config"; \
+		else \
+			rm $(HOME)/.irssi/config; \
+			ln -s $(CURDIR)/.irssi/config $(HOME)/.irssi/config; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Config symlink updated"; \
+		fi \
+	elif [ -e $(HOME)/.irssi/config ]; then \
+		backup_file=$(HOME)/.irssi/config.backup-$$(date +%Y%m%d-%H%M%S); \
+		mv $(HOME)/.irssi/config $$backup_file; \
+		ln -s $(CURDIR)/.irssi/config $(HOME)/.irssi/config; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Config symlink created (backup at $$backup_file)"; \
+	else \
+		ln -s $(CURDIR)/.irssi/config $(HOME)/.irssi/config; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Config symlink created: $(HOME)/.irssi/config"; \
+	fi
+	@$(call print_colored,"Linking gruvbox theme...")
+	@if [ -L $(HOME)/.irssi/gruvbox-dark.theme ]; then \
+		current_target=$$(readlink $(HOME)/.irssi/gruvbox-dark.theme); \
+		if [ "$$current_target" = "$(CURDIR)/.irssi/gruvbox-dark.theme" ]; then \
+			printf "\033[1;32m%s\033[0m\n" "✓ Theme symlink already points to $(CURDIR)/.irssi/gruvbox-dark.theme"; \
+		else \
+			rm $(HOME)/.irssi/gruvbox-dark.theme; \
+			ln -s $(CURDIR)/.irssi/gruvbox-dark.theme $(HOME)/.irssi/gruvbox-dark.theme; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Theme symlink updated"; \
+		fi \
+	elif [ -e $(HOME)/.irssi/gruvbox-dark.theme ]; then \
+		backup_file=$(HOME)/.irssi/gruvbox-dark.theme.backup-$$(date +%Y%m%d-%H%M%S); \
+		mv $(HOME)/.irssi/gruvbox-dark.theme $$backup_file; \
+		ln -s $(CURDIR)/.irssi/gruvbox-dark.theme $(HOME)/.irssi/gruvbox-dark.theme; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Theme symlink created (backup at $$backup_file)"; \
+	else \
+		ln -s $(CURDIR)/.irssi/gruvbox-dark.theme $(HOME)/.irssi/gruvbox-dark.theme; \
+		printf "\033[1;32m%s\033[0m\n" "✓ Theme symlink created: $(HOME)/.irssi/gruvbox-dark.theme"; \
+	fi
+	@$(call print_colored,"✓ irssi configuration complete","green")
+
+clean-irssi:
+	@$(call print_colored,"Removing irssi symlinks...")
+	@if [ -L $(HOME)/.irssi/config ]; then \
+		current_target=$$(readlink $(HOME)/.irssi/config); \
+		if [ "$$current_target" = "$(CURDIR)/.irssi/config" ]; then \
+			rm $(HOME)/.irssi/config; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Config symlink removed"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Config symlink points to different location: $$current_target"; \
+		fi \
+	elif [ -e $(HOME)/.irssi/config ]; then \
+		printf "\033[1;33m%s\033[0m\n" "⚠ $(HOME)/.irssi/config exists but is not a symlink"; \
+	else \
+		printf "\033[1;32m%s\033[0m\n" "✓ No config symlink found"; \
+	fi
+	@if [ -L $(HOME)/.irssi/gruvbox-dark.theme ]; then \
+		current_target=$$(readlink $(HOME)/.irssi/gruvbox-dark.theme); \
+		if [ "$$current_target" = "$(CURDIR)/.irssi/gruvbox-dark.theme" ]; then \
+			rm $(HOME)/.irssi/gruvbox-dark.theme; \
+			printf "\033[1;32m%s\033[0m\n" "✓ Theme symlink removed"; \
+		else \
+			printf "\033[1;33m%s\033[0m\n" "⚠ Theme symlink points to different location: $$current_target"; \
+		fi \
+	elif [ -e $(HOME)/.irssi/gruvbox-dark.theme ]; then \
+		printf "\033[1;33m%s\033[0m\n" "⚠ $(HOME)/.irssi/gruvbox-dark.theme exists but is not a symlink"; \
+	else \
+		printf "\033[1;32m%s\033[0m\n" "✓ No theme symlink found"; \
+	fi
 
 test-docker-setup:
 	@$(call print_colored,"Setting up Docker test environment...","cyan")

@@ -1,0 +1,252 @@
+# Gruvbox Dark theme for irssi
+# Matches the Gruvbox palette used across dotfiles
+#
+# Gruvbox 256-color palette:
+#   BG0=235 (#282828)  BG1=237 (#3c3836)  BG2=239 (#504945)
+#   BG3=241 (#665c54)  BG4=243 (#7c6f64)
+#   FG0=229 (#fbf1c7)  FG1=223 (#ebdbb2)  FG2=250 (#d5c4a1)
+#   FG3=248 (#bdae93)  FG4=246 (#a89984)
+#   RED=167    GREEN=142   YELLOW=214  BLUE=109
+#   PURPLE=175 AQUA=108    ORANGE=208
+
+abstracts = {
+  ##
+  ## Generic
+  ##
+
+  # Text to insert at the beginning of each non-hierarchical line
+  line_start = "%x6C>>%n ";
+
+  # Timestamp
+  timestamp = "%x6C[%c$*%x6C]%n";
+
+  # Any kind of text that needs hilighting
+  hilight = "%_$*%_";
+
+  # Any kind of error message
+  error = "%x6D$*%n";
+
+  # Channel name is printed
+  channel = "%x6D$*%n";
+
+  # Nick is printed
+  nick = "%_%x8E$*%_%n";
+
+  # Nick host is printed
+  nickhost = "[$*]";
+
+  # Server name is printed
+  server = "%_%x6D$*%_";
+
+  # Some kind of comment is printed
+  comment = "[$*]";
+
+  # Reason for something is printed
+  reason = "{comment $*}";
+
+  # Mode change is printed
+  mode = "{comment $*}";
+
+  ##
+  ## Channel specific
+  ##
+
+  # Highlighted nick/host
+  channick_hilight = "%x8E$*%n";
+  chanhost_hilight = "{nickhost $*}";
+
+  # Nick/host is printed (strstrted strstart strstart)
+  channick = "%x6D$*%n";
+  chanhost = "{nickhost $*}";
+
+  # Channel name at strstart of /markup
+  channelhilight = "%x8E$*%n";
+
+  # Ban/ban exception/invite list mask is printed
+  ban = "%x6D$*%n";
+
+  ##
+  ## Messages
+  ##
+
+  # The basic strstructure of how a message is printed
+  # $0 = Nick mode, $1 = nick
+  msgnick = "$0$1-%x6C:%n %|";
+
+  # Message from you is strinted
+  ownmsgnick = "{msgnick $0 $1-}";
+  ownnick = "%x8E$*%n";
+
+  # Public message in channel, $0 = nick mode, $1 = nick
+  pubmsgnick = "{msgnick $0 $1-}";
+  pubnick = "%x6D$*%n";
+
+  # Public message in channel meant for me, $0 = nick mode, $1 = nick
+  pubmsgmenick = "{msgnick $0 $1-}";
+  menick = "%x8E$*%n";
+
+  # Public highlighted message in channel
+  pubmsghinick = "{msgnick $1 $0$2-%n}";
+  msgchannel = "%x6C:%c$*%n";
+
+  # Private message, $0 = nick, $1 = host
+  privmsg = "[%x6D$0%x6C(%n$1-%x6C)%n] ";
+
+  # Private message from you, $0 = your nick, $1 = target nick
+  ownprivmsg = "[%x8E$0%x6C(%n$1-%x6C)%n] ";
+
+  # Private message in query
+  privmsgnick = "{msgnick %x6D$*%n}";
+
+  # Own message in query
+  ownprivmsgnick = "{msgnick $*}";
+
+  ##
+  ## Actions (/me struff)
+  ##
+
+  # Used internally by this theme
+  action_core = "%x6D * $*%n";
+
+  # Generic ctcp action
+  action = "{action_core $*} ";
+
+  # Own ctcp action
+  ownaction = "{action $*}";
+
+  # Own ctcp action with target
+  ownaction_target = "{action_core $0}%x6C:%c$1%n ";
+
+  # Private ctcp action
+  pvtaction = "%W (*) $*%n ";
+  pvtaction_query = "{action $*}";
+
+  # Public ctcp action
+  pubaction = "{action $*}";
+
+  ##
+  ## Notices
+  ##
+
+  ownnotice = "[%x8E$0%x6C(%n$1-%x6C)]%n ";
+  notice = "%x6C-%x6D$*%x6C-%n ";
+  pubnotice_channel = "%x6C:%c$*";
+  pvtnotice_host = "%x6C(%n$*%x6C)";
+  servernotice = "%x6D!$*%n ";
+
+  ##
+  ## CTCP
+  ##
+
+  ownctcp = "[%x8E$0%x6C(%n$1-%x6C)] ";
+  ctcp = "%x6D$*%n";
+
+  ##
+  ## Wallops
+  ##
+
+  wallop = "%x6D$*%n: ";
+  wallop_nick = "%n$*";
+  wallop_action = "%W * $*%n ";
+
+  ##
+  ## Netsplits
+  ##
+
+  netsplit = "%x6D$*%n";
+  netjoin = "%x8E$*%n";
+
+  ##
+  ## Names
+  ##
+
+  names_prefix = "";
+  names_nick = "[%_$0%_$1-] ";
+  names_nick_op = "{names_nick $*}";
+  names_nick_halfop = "{names_nick $*}";
+  names_nick_voice = "{names_nick $*}";
+  names_users = "[%x8E$*%n]";
+  names_channel = "%x6D$*%n";
+
+  ##
+  ## DCC
+  ##
+
+  dcc = "%x6D$*%n";
+  dccfile = "%_$*%_";
+
+  dccownmsg = "[%x8E$0%x6C($1-%x6C)%n] ";
+  dccownnick = "%x8E$*%n";
+  dccownquerynick = "%W$*%n";
+  dccownaction = "{action $*}";
+  dccownaction_target = "{action_core $0}%x6C:%c$1%n ";
+
+  dccmsg = "[%x6D$1-%x6C(%n$0%x6C)%n] ";
+  dccquerynick = "%x6D$*%n";
+  dccaction = "%W (*dcc) $*%n %|";
+
+  ##
+  ## Status Bar
+  ##
+
+  # Default background for all statusbars (green bg, white text)
+  sb_background = "%W%2";
+
+  # Default background for "weights" statusbar
+  sb_default_bg = "%W%2";
+
+  # Background for prompt / built-in statusbar
+  sb_prompt_bg = "%n";
+
+  # Background for info statusbar
+  sb_info_bg = "%W%2";
+
+  # Background for topicbar
+  sb_topic_bg = "%W%2";
+
+  # Text at the start of statusbars
+  sbstart = "";
+
+  # Text at the end of statusbars
+  sbend = " ";
+
+  topicsbstart = "{sbstart $*}";
+  topicsbend = "{sbend $*}";
+
+  prompt = "[$*] ";
+
+  sb = " %W%2[%W$*%W%2]%n";
+  sbmode = "(%W+%n$*)";
+  sbaway = " (%Waway%n)";
+  sbservertag = ":$0 (change with ^X)";
+  sbnickmode = "$0";
+
+  # Activity in statusbar
+  # ',' separator
+  sb_act_sep = "%W$*";
+  # Normal text
+  sb_act_text = "%W$*";
+  # Public message
+  sb_act_msg = "%W$*";
+  # Hilight
+  sb_act_hilight = "%x8E$*";
+  # Hilight with specified color
+  sb_act_hilight_color = "$0$1-%n";
+};
+
+formats = {
+  "fe-common/core" = {
+    # Join format - gruvbox green
+    join = "%x8E-->%n {channick_hilight $0} {chanhost $1} has joined {channel $2}";
+    # Part format - gruvbox yellow
+    part = "%x6D<--%n {channick $0} {chanhost $1} has left {channel $2} {reason $3}";
+    # Quit format - gruvbox blue
+    quit = "%x6D<--%n {channick $0} {chanhost $1} has quit {reason $2}";
+    # Kick format - gruvbox blue
+    kick = "%x6D<--%n {channick $0} was kicked from {channel $1} by {nick $2} {reason $3}";
+    # Nick change - gruvbox aqua
+    nick_changed = "%x6C---%n {channick $0} is now known as {channick_hilight $1}";
+    # Your nick change
+    your_nick_changed = "%x6C---%n You're now known as {channick_hilight $1}";
+  };
+};
