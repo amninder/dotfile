@@ -47,6 +47,7 @@ Personal development environment configuration featuring Neovim, Tmux, and shell
 - **ifstat** (for bandwidth monitoring in tmux)
 - **Node.js** (for some LSP servers)
 - **Python 3** (for Python development features)
+- **XeLaTeX** (for PDF document generation)
 
 ## 🚀 Installation
 
@@ -178,6 +179,53 @@ If you see boxes (□) or missing icons, ensure:
 1. A Nerd Font is installed
 2. Your terminal is configured to use it
 3. Terminal is restarted after font changes
+
+## 🛠️ XeLaTeX Installation
+
+Install XeLaTeX for PDF document generation with Pandoc support.
+
+### Quick Install (macOS)
+
+```bash
+# Install Pandoc
+brew install pandoc
+
+# Install BasicTeX (minimal TeX distribution)
+brew install --cask basictex
+
+# Update PATH (add to ~/.zshrc.local or ~/.zshrc)
+export PATH="/Library/TeX/texbin:$PATH"
+
+# Or reload path helper
+eval "$(/usr/libexec/path_helper)"
+```
+
+### Install LaTeX Packages
+
+After installing BasicTeX, install additional packages:
+
+```bash
+# Update TeX Live Manager
+sudo tlmgr update --self
+
+# Install XeLaTeX and common packages
+sudo tlmgr install texliveonfly xelatex adjustbox tcolorbox \
+    collectbox ucs environ trimspaces titling enumitem rsfs
+```
+
+### Verify Installation
+
+```bash
+xelatex --version
+```
+
+### Usage with Pandoc
+
+Convert Markdown to PDF using XeLaTeX:
+
+```bash
+pandoc document.md -o document.pdf --pdf-engine=xelatex
+```
 
 ## 🛠️ Dev Utilities Installation
 
