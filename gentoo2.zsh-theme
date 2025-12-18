@@ -45,7 +45,7 @@ prompt_char() {
 prompt_venv() {
   local virtualenv_path="$VIRTUAL_ENV"
   if [[ -n $virtualenv_path && -n $VIRTUAL_ENV_DISABLE_PROMPT ]]; then
-    prompt_segment black red " ($(basename $virtualenv_path))"
+    echo "%{$fg[red]%} ($(basename $virtualenv_path))%{$reset_color%}"
   fi
 }
 
