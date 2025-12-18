@@ -1,5 +1,13 @@
 -- Main LSP Configuration
 -- https://github.com/neovim/nvim-lspconfig
+
+-- Add filetype detection for DBML files
+vim.filetype.add {
+  extension = {
+    dbml = 'dbml',
+  },
+}
+
 return {
   'neovim/nvim-lspconfig',
   dependencies = {
@@ -212,6 +220,26 @@ return {
           require('lspconfig')[server_name].setup(server)
         end,
       },
+    }
+
+    -- Manual LSP configurations for servers not in Mason
+    -- DBML Language Server (install: cargo install dbml-language-server)
+    local lspconfig = require 'lspconfig'
+    local configs = require 'lspconfig.configs'
+
+    if not configs.dbml_lsp then
+      configs.dbml_lsp = {
+        default_config = {
+          cmd = { vim.fn.expand '~/.cargo/bin/dbml-language-server' },
+          filetypes = { 'dbml' },
+          root_dir = lspconfig.util.root_pattern('.git'),
+          single_file_support = true,
+        },
+      }
+    end
+
+    lspconfig.dbml_lsp.setup {
+      capabilities = capabilities,
     }
   end,
 }
