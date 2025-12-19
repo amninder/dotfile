@@ -125,29 +125,33 @@ return {
         },
       },
 
-      -- Python (using python-lsp-server)
+      -- Python (using python-lsp-server with ruff)
+      -- Requires: pip install python-lsp-server python-lsp-ruff ruff
       pylsp = {
         settings = {
           pylsp = {
             plugins = {
-              pycodestyle = {
+              -- Ruff handles linting and formatting (replaces pycodestyle, pyflakes, autopep8, yapf)
+              ruff = {
                 enabled = true,
-                maxLineLength = 100,
+                lineLength = 100,
+                -- select = {}, -- Rules to enable (default: ruff defaults)
+                -- ignore = {}, -- Rules to ignore
+                -- extendSelect = { 'I' }, -- Add import sorting
+                -- format = { 'I' }, -- Rules to apply during formatting
               },
+              -- Disable linters that ruff replaces
+              pycodestyle = { enabled = false },
+              pyflakes = { enabled = false },
+              mccabe = { enabled = false },
+              autopep8 = { enabled = false },
+              yapf = { enabled = false },
+              -- Keep other useful plugins
               pylint = {
                 enabled = false, -- Can be enabled if pylint is installed
               },
-              pyflakes = {
-                enabled = true,
-              },
-              autopep8 = {
-                enabled = true,
-              },
-              yapf = {
-                enabled = false,
-              },
               black = {
-                enabled = false, -- Enable if black is installed
+                enabled = false, -- Disabled - ruff handles formatting
               },
               rope_autoimport = {
                 enabled = true,
