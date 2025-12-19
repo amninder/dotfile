@@ -54,7 +54,7 @@ return {
           },
           glyphs = {
             git = {
-              unstaged = '', -- Modified/changed (nerd font f067)
+              unstaged = '', -- Modified/changed (nerd font f0fe)
               staged = '', -- Staged for commit
               unmerged = '', -- Merge conflict
               renamed = '➜', -- Renamed
