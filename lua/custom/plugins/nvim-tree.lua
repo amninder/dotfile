@@ -1,5 +1,6 @@
 -- File explorer with tree view
 -- https://github.com/nvim-tree/nvim-tree.lua
+--
 return {
   'nvim-tree/nvim-tree.lua',
   config = function()
@@ -53,7 +54,7 @@ return {
           },
           glyphs = {
             git = {
-              unstaged = '', -- Modified/changed
+              unstaged = '', -- Modified/changed (nerd font f067)
               staged = '', -- Staged for commit
               unmerged = '', -- Merge conflict
               renamed = '➜', -- Renamed
