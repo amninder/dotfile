@@ -51,8 +51,34 @@ return {
               color = true,
             },
           },
+          glyphs = {
+            git = {
+              unstaged = '',  -- Modified/changed
+              staged = '',    -- Staged for commit
+              unmerged = '',  -- Merge conflict
+              renamed = '➜',   -- Renamed
+              untracked = '', -- New/added file
+              deleted = '',   -- Deleted
+              ignored = '◌',   -- Git ignored
+            },
+          },
         },
+        highlight_git = 'name', -- Highlight git status on file/folder names
+      },
+      git = {
+        enable = true,
+        show_on_dirs = true,
+        show_on_open_dirs = true,
       },
     }
+
+    -- Custom highlight colors for git signs (Gruvbox palette)
+    vim.api.nvim_set_hl(0, 'NvimTreeGitNew', { fg = '#b8bb26' })        -- Green - added/untracked
+    vim.api.nvim_set_hl(0, 'NvimTreeGitDirty', { fg = '#fabd2f' })      -- Yellow - modified
+    vim.api.nvim_set_hl(0, 'NvimTreeGitStaged', { fg = '#b8bb26' })     -- Green - staged
+    vim.api.nvim_set_hl(0, 'NvimTreeGitDeleted', { fg = '#fb4934' })    -- Red - deleted
+    vim.api.nvim_set_hl(0, 'NvimTreeGitRenamed', { fg = '#d3869b' })    -- Purple - renamed
+    vim.api.nvim_set_hl(0, 'NvimTreeGitMerge', { fg = '#fe8019' })      -- Orange - merge conflict
+    vim.api.nvim_set_hl(0, 'NvimTreeGitIgnored', { fg = '#928374' })    -- Gray - ignored
   end,
 }
