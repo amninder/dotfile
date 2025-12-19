@@ -54,13 +54,13 @@ return {
           },
           glyphs = {
             git = {
-              unstaged = '󰃅', -- Modified/changed (nerd font f055)
-              staged = '󰃅', -- Staged for commit
-              unmerged = '~', -- Merge conflict
-              renamed = '➜', -- Renamed
-              untracked = '󰃅', -- New/added file (nerd font f00c5)
-              deleted = '󰀨', -- Deleted (nerd font f0028)
-              ignored = '◌', -- Git ignored
+              unstaged = '', -- Modified/changed (nerd font f055)
+              staged = '', -- Staged for commit
+              unmerged = '󰀨', -- Merge conflict
+              renamed = '', -- Renamed
+              untracked = '', -- New/added file (nerd font f00c5)
+              deleted = '', -- Deleted (nerd font f0028)
+              ignored = '', -- Git ignored
             },
           },
         },
