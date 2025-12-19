@@ -59,7 +59,7 @@ return {
               unmerged = '~', -- Merge conflict
               renamed = '➜', -- Renamed
               untracked = '󰃅', -- New/added file (nerd font f00c5)
-              deleted = '◌', -- Deleted (nerd font f056)
+              deleted = '', -- Deleted (nerd font f444)
               ignored = '◌', -- Git ignored
             },
           },
