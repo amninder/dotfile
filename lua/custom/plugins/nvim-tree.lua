@@ -1,7 +1,6 @@
 -- File explorer with tree view
 -- https://github.com/nvim-tree/nvim-tree.lua
 --
---
 return {
   'nvim-tree/nvim-tree.lua',
   config = function()
@@ -59,7 +58,7 @@ return {
               staged = '', -- Staged for commit
               unmerged = '', -- Merge conflict
               renamed = '➜', -- Renamed
-              untracked = '', -- New/added file
+              untracked = '󰃅', -- New/added file (nerd font f00c5)
               deleted = '', -- Deleted
               ignored = '◌', -- Git ignored
             },
