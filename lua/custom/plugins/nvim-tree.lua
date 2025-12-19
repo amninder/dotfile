@@ -74,7 +74,7 @@ return {
     }
 
     -- Custom highlight colors for git signs (Gruvbox palette) with bold
-    vim.api.nvim_set_hl(0, 'NvimTreeGitNew', { fg = '#b8bb26', bold = true }) -- Green - added/untracked
+    vim.api.nvim_set_hl(0, 'NvimTreeGitNew', { fg = '#00ff00', bold = true }) -- Bright green - added/untracked
     vim.api.nvim_set_hl(0, 'NvimTreeGitDirty', { fg = '#fabd2f', bold = true }) -- Yellow - modified
     vim.api.nvim_set_hl(0, 'NvimTreeGitStaged', { fg = '#b8bb26', bold = true }) -- Green - staged
     vim.api.nvim_set_hl(0, 'NvimTreeGitDeleted', { fg = '#fb4934', bold = true }) -- Red - deleted
@@ -83,11 +83,11 @@ return {
     vim.api.nvim_set_hl(0, 'NvimTreeGitIgnored', { fg = '#928374' }) -- Gray - ignored (not bold)
     -- Bold highlights for file/folder names with git status
     vim.api.nvim_set_hl(0, 'NvimTreeGitFileDirtyHL', { fg = '#fabd2f', bold = true })
-    vim.api.nvim_set_hl(0, 'NvimTreeGitFileNewHL', { fg = '#b8bb26', bold = true })
+    vim.api.nvim_set_hl(0, 'NvimTreeGitFileNewHL', { fg = '#00ff00', bold = true })
     vim.api.nvim_set_hl(0, 'NvimTreeGitFileStagedHL', { fg = '#b8bb26', bold = true })
     vim.api.nvim_set_hl(0, 'NvimTreeGitFileDeletedHL', { fg = '#fb4934', bold = true })
     vim.api.nvim_set_hl(0, 'NvimTreeGitFolderDirtyHL', { fg = '#fabd2f', bold = true })
-    vim.api.nvim_set_hl(0, 'NvimTreeGitFolderNewHL', { fg = '#b8bb26', bold = true })
+    vim.api.nvim_set_hl(0, 'NvimTreeGitFolderNewHL', { fg = '#00ff00', bold = true })
     vim.api.nvim_set_hl(0, 'NvimTreeGitFolderStagedHL', { fg = '#b8bb26', bold = true })
     vim.api.nvim_set_hl(0, 'NvimTreeGitFolderDeletedHL', { fg = '#fb4934', bold = true })
   end,
