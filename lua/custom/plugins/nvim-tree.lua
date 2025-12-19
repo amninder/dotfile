@@ -53,13 +53,13 @@ return {
           },
           glyphs = {
             git = {
-              unstaged = '',  -- Modified/changed
-              staged = '',    -- Staged for commit
-              unmerged = '',  -- Merge conflict
-              renamed = '➜',   -- Renamed
+              unstaged = '', -- Modified/changed
+              staged = '', -- Staged for commit
+              unmerged = '', -- Merge conflict
+              renamed = '➜', -- Renamed
               untracked = '', -- New/added file
-              deleted = '',   -- Deleted
-              ignored = '◌',   -- Git ignored
+              deleted = '', -- Deleted
+              ignored = '◌', -- Git ignored
             },
           },
         },
@@ -72,13 +72,22 @@ return {
       },
     }
 
-    -- Custom highlight colors for git signs (Gruvbox palette)
-    vim.api.nvim_set_hl(0, 'NvimTreeGitNew', { fg = '#b8bb26' })        -- Green - added/untracked
-    vim.api.nvim_set_hl(0, 'NvimTreeGitDirty', { fg = '#fabd2f' })      -- Yellow - modified
-    vim.api.nvim_set_hl(0, 'NvimTreeGitStaged', { fg = '#b8bb26' })     -- Green - staged
-    vim.api.nvim_set_hl(0, 'NvimTreeGitDeleted', { fg = '#fb4934' })    -- Red - deleted
-    vim.api.nvim_set_hl(0, 'NvimTreeGitRenamed', { fg = '#d3869b' })    -- Purple - renamed
-    vim.api.nvim_set_hl(0, 'NvimTreeGitMerge', { fg = '#fe8019' })      -- Orange - merge conflict
-    vim.api.nvim_set_hl(0, 'NvimTreeGitIgnored', { fg = '#928374' })    -- Gray - ignored
+    -- Custom highlight colors for git signs (Gruvbox palette) with bold
+    vim.api.nvim_set_hl(0, 'NvimTreeGitNew', { fg = '#b8bb26', bold = true }) -- Green - added/untracked
+    vim.api.nvim_set_hl(0, 'NvimTreeGitDirty', { fg = '#fabd2f', bold = true }) -- Yellow - modified
+    vim.api.nvim_set_hl(0, 'NvimTreeGitStaged', { fg = '#b8bb26', bold = true }) -- Green - staged
+    vim.api.nvim_set_hl(0, 'NvimTreeGitDeleted', { fg = '#fb4934', bold = true }) -- Red - deleted
+    vim.api.nvim_set_hl(0, 'NvimTreeGitRenamed', { fg = '#d3869b', bold = true }) -- Purple - renamed
+    vim.api.nvim_set_hl(0, 'NvimTreeGitMerge', { fg = '#fe8019', bold = true }) -- Orange - merge conflict
+    vim.api.nvim_set_hl(0, 'NvimTreeGitIgnored', { fg = '#928374' }) -- Gray - ignored (not bold)
+    -- Bold highlights for file/folder names with git status
+    vim.api.nvim_set_hl(0, 'NvimTreeGitFileDirtyHL', { fg = '#fabd2f', bold = true })
+    vim.api.nvim_set_hl(0, 'NvimTreeGitFileNewHL', { fg = '#b8bb26', bold = true })
+    vim.api.nvim_set_hl(0, 'NvimTreeGitFileStagedHL', { fg = '#b8bb26', bold = true })
+    vim.api.nvim_set_hl(0, 'NvimTreeGitFileDeletedHL', { fg = '#fb4934', bold = true })
+    vim.api.nvim_set_hl(0, 'NvimTreeGitFolderDirtyHL', { fg = '#fabd2f', bold = true })
+    vim.api.nvim_set_hl(0, 'NvimTreeGitFolderNewHL', { fg = '#b8bb26', bold = true })
+    vim.api.nvim_set_hl(0, 'NvimTreeGitFolderStagedHL', { fg = '#b8bb26', bold = true })
+    vim.api.nvim_set_hl(0, 'NvimTreeGitFolderDeletedHL', { fg = '#fb4934', bold = true })
   end,
 }
