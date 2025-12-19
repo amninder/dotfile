@@ -125,37 +125,21 @@ return {
         },
       },
 
-      -- Python (using python-lsp-server with ruff)
-      -- Requires: pip install python-lsp-server python-lsp-ruff ruff
-      pylsp = {
+      -- Python: ruff for linting/formatting, pyright for type checking
+      -- Ruff reads settings from pyproject.toml or ruff.toml
+      ruff = {},
+
+      -- Pyright for Python type checking and intellisense
+      pyright = {
         settings = {
-          pylsp = {
-            plugins = {
-              -- Ruff handles linting and formatting (replaces pycodestyle, pyflakes, autopep8, yapf)
-              ruff = {
-                enabled = true,
-                lineLength = 100,
-                -- select = {}, -- Rules to enable (default: ruff defaults)
-                -- ignore = {}, -- Rules to ignore
-                -- extendSelect = { 'I' }, -- Add import sorting
-                -- format = { 'I' }, -- Rules to apply during formatting
-              },
-              -- Disable linters that ruff replaces
-              pycodestyle = { enabled = false },
-              pyflakes = { enabled = false },
-              mccabe = { enabled = false },
-              autopep8 = { enabled = false },
-              yapf = { enabled = false },
-              -- Keep other useful plugins
-              pylint = {
-                enabled = false, -- Can be enabled if pylint is installed
-              },
-              black = {
-                enabled = false, -- Disabled - ruff handles formatting
-              },
-              rope_autoimport = {
-                enabled = true,
-              },
+          pyright = {
+            -- Disable import organization, ruff handles it
+            disableOrganizeImports = true,
+          },
+          python = {
+            analysis = {
+              -- Ignore all files for analysis to avoid duplicating ruff diagnostics
+              ignore = { '*' },
             },
           },
         },
