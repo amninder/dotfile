@@ -56,10 +56,10 @@ return {
             git = {
               unstaged = '󰃅', -- Modified/changed (nerd font f055)
               staged = '󰃅', -- Staged for commit
-              unmerged = '', -- Merge conflict
+              unmerged = '~', -- Merge conflict
               renamed = '➜', -- Renamed
               untracked = '󰃅', -- New/added file (nerd font f00c5)
-              deleted = '', -- Deleted (nerd font f056)
+              deleted = '◌', -- Deleted (nerd font f056)
               ignored = '◌', -- Git ignored
             },
           },
