@@ -126,8 +126,36 @@ return {
       },
 
       -- Python: ruff for linting/formatting, pyright for type checking
-      -- Ruff reads settings from pyproject.toml or ruff.toml
-      ruff = {},
+      -- Ruff reads project settings from pyproject.toml or ruff.toml
+      ruff = {
+        on_attach = function(client, bufnr)
+          -- Disable hover in favor of pyright
+          client.server_capabilities.hoverProvider = false
+        end,
+        init_options = {
+          settings = {
+            -- Prefer project config (pyproject.toml/ruff.toml), fall back to editor settings
+            configurationPreference = 'filesystemFirst',
+            -- Default line length (overridden by project config)
+            lineLength = 100,
+            -- Enable fix all and organize imports code actions
+            fixAll = true,
+            organizeImports = true,
+            -- Show syntax errors
+            showSyntaxErrors = true,
+            -- Lint settings
+            lint = {
+              enable = true,
+              -- preview = false,
+            },
+            -- Code action settings
+            codeAction = {
+              disableRuleComment = { enable = true },
+              fixViolation = { enable = true },
+            },
+          },
+        },
+      },
 
       -- Pyright for Python type checking and intellisense
       pyright = {
@@ -138,8 +166,8 @@ return {
           },
           python = {
             analysis = {
-              -- Ignore all files for analysis to avoid duplicating ruff diagnostics
-              ignore = { '*' },
+              -- Use ruff for linting, pyright for type checking only
+              typeCheckingMode = 'basic',
             },
           },
         },
