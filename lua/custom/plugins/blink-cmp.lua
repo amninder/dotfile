@@ -26,6 +26,9 @@ return {
       -- Disable C-e to avoid conflict with nvim-tree toggle
       -- Users can still close completion menu with <Esc>
       ['<C-e>'] = {},
+      -- Tab to accept completion
+      ['<Tab>'] = { 'select_and_accept', 'fallback' },
+      ['<S-Tab>'] = { 'select_prev', 'fallback' },
     },
 
     appearance = {

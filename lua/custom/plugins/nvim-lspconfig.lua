@@ -125,33 +125,49 @@ return {
         },
       },
 
-      -- Python (using python-lsp-server)
-      pylsp = {
+      -- Python: ruff for linting/formatting, pyright for type checking
+      -- Ruff reads project settings from pyproject.toml or ruff.toml
+      ruff = {
+        on_attach = function(client, bufnr)
+          -- Disable hover in favor of pyright
+          client.server_capabilities.hoverProvider = false
+        end,
+        init_options = {
+          settings = {
+            -- Prefer project config (pyproject.toml/ruff.toml), fall back to editor settings
+            configurationPreference = 'filesystemFirst',
+            -- Default line length (overridden by project config)
+            lineLength = 100,
+            -- Enable fix all and organize imports code actions
+            fixAll = true,
+            organizeImports = true,
+            -- Show syntax errors
+            showSyntaxErrors = true,
+            -- Lint settings
+            lint = {
+              enable = true,
+              -- preview = false,
+            },
+            -- Code action settings
+            codeAction = {
+              disableRuleComment = { enable = true },
+              fixViolation = { enable = true },
+            },
+          },
+        },
+      },
+
+      -- Pyright for Python type checking and intellisense
+      pyright = {
         settings = {
-          pylsp = {
-            plugins = {
-              pycodestyle = {
-                enabled = true,
-                maxLineLength = 100,
-              },
-              pylint = {
-                enabled = false, -- Can be enabled if pylint is installed
-              },
-              pyflakes = {
-                enabled = true,
-              },
-              autopep8 = {
-                enabled = true,
-              },
-              yapf = {
-                enabled = false,
-              },
-              black = {
-                enabled = false, -- Enable if black is installed
-              },
-              rope_autoimport = {
-                enabled = true,
-              },
+          pyright = {
+            -- Disable import organization, ruff handles it
+            disableOrganizeImports = true,
+          },
+          python = {
+            analysis = {
+              -- Use ruff for linting, pyright for type checking only
+              typeCheckingMode = 'basic',
             },
           },
         },
