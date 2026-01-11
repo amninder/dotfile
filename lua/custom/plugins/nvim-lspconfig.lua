@@ -159,6 +159,36 @@ return {
 
       -- Pyright for Python type checking and intellisense
       pyright = {
+        before_init = function(_, config)
+          -- Dynamically detect Python environment for type checking
+          local function get_python_path(workspace)
+            -- Check for virtual environment in workspace
+            local venv_paths = {
+              workspace .. '/.venv/bin/python',
+              workspace .. '/venv/bin/python',
+              workspace .. '/.env/bin/python',
+            }
+            for _, venv_path in ipairs(venv_paths) do
+              if vim.fn.executable(venv_path) == 1 then
+                return venv_path
+              end
+            end
+
+            -- Check VIRTUAL_ENV environment variable
+            local virtual_env = vim.env.VIRTUAL_ENV
+            if virtual_env then
+              local venv_python = virtual_env .. '/bin/python'
+              if vim.fn.executable(venv_python) == 1 then
+                return venv_python
+              end
+            end
+
+            -- Fall back to system python
+            return vim.fn.exepath 'python3' or vim.fn.exepath 'python' or 'python'
+          end
+
+          config.settings.python.pythonPath = get_python_path(config.root_dir or vim.fn.getcwd())
+        end,
         settings = {
           pyright = {
             -- Disable import organization, ruff handles it
